@@ -18,7 +18,9 @@ with sync_playwright() as p:
   assert page.locator('.bar').count()==5 and page.locator('#sizeStat').inner_text()=='5'
   for key in ['bubble','selection','insertion','shell','merge','quick','heap','counting','radix','bucket']:
    page.locator('[data-algo="'+key+'"]').click()
-   assert page.locator('[data-algo="'+key+'"]').get_attribute('aria-pressed')=='true'
+   pressed=page.locator('[data-algo="'+key+'"]').get_attribute('aria-pressed')
+   print('CHECK',mode,key,'pressed:',pressed,'errors:',errors,flush=True)
+   assert pressed=='true',(mode,key,pressed,errors)
    assert page.locator('.bar').count()==5
    page.locator('#stepBtn').click()
    assert page.locator('#stepStat').inner_text().startswith('1/')
