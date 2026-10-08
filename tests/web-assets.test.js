@@ -3,3 +3,11 @@ const read=p=>readFile(resolve(import.meta.dirname,'..',p),'utf8');
 test('interface hooks exist in the HTML',async()=>{const html=await read('web/index.html'),app=await read('web/app.js');const ids=[...app.matchAll(/\$\('([^']+)'\)/g)].map(m=>m[1]);assert.ok(ids.length>35);for(const id of ids)assert.match(html,new RegExp('\\bid="'+id+'"'),'Missing element: '+id);});
 test('ten algorithm UI, theme toggle, and custom-array events are wired',async()=>{const html=await read('web/index.html'),app=await read('web/app.js');assert.match(html,/id="algorithmGrid"/);assert.match(html,/id="themeBtn"/);assert.match(app,/addEventListener\('click',applyCustom\)/);assert.match(app,/selectAlgorithm/);assert.match(app,/generateTrace\(initial,algorithm\)/);assert.match(app,/applyTheme/);});
 test('generated standalone embeds styling and app logic',async()=>{const html=await read('web/standalone.html'),bundle=await read('web/app.bundle.js');assert.match(html,/<style>[\s\S]*<\/style>/);assert.match(html,/<script>[\s\S]*<\/script>/);assert.doesNotMatch(html,/src="\.\/app\.bundle\.js"|href="\.\/styles\.css"/);assert.match(bundle,/function generateTrace\(/);assert.match(bundle,/addEventListener\('click',applyCustom\)/);assert.match(html,/data-theme="light"/);});
+
+test('every ui.* property exists in the controller handle map',async()=>{
+ const app=await read('web/app.js');
+ const init=app.slice(app.indexOf('const ui='),app.indexOf(';\nlet algorithm'));
+ const names=new Set([...init.matchAll(/\b([A-Za-z_$][\w$]*):\$\('/g)].map(m=>m[1]));
+ const used=[...app.matchAll(/\bui\.([A-Za-z_$][\w$]*)/g)].map(m=>m[1]);
+ for(const name of used)assert.ok(names.has(name),'Undefined UI binding: ui.'+name);
+});
