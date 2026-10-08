@@ -52,3 +52,12 @@
 .inspector-visual .heap-caption{font-size:11px;color:var(--muted);line-height:1.7;padding:10px 2px 2px}
 @media(max-width:780px){.inspector-visual{max-height:450px}}
 @media(max-width:600px){.inspector-visual{min-height:245px;max-height:420px}}
+
+/* Hoare partition lens: dim outside active subarray and label both pointers. */
+.bar.range-dim:not(.sorted){opacity:.27}
+.bar-track[data-pointer="I"]::before,.bar-track[data-pointer="J"]::before,.bar-track[data-pointer="IJ"]::before{
+ position:absolute;z-index:3;top:-12px;left:50%;transform:translateX(-50%);
+ background:var(--compare);color:var(--panel);border-radius:5px;
+ padding:1px 4px;font:900 10px Consolas,monospace;content:attr(data-pointer)
+}
+@media(prefers-reduced-motion:reduce){.heap-edge,.heap-circle,.counting-track i{transition:none!important}}
