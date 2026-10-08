@@ -18,12 +18,13 @@ export function generateTrace(input,algorithm='bubble'){
  if(!Array.isArray(input)||!input.every(Number.isSafeInteger))throw new TypeError('Expected safe integers');
  if(input.length>96)throw new RangeError('Visual length must be <=96');
  const a=input.slice(),n=a.length;const frames=[];let comparisons=0,swaps=0,writes=0,pass=0;
- function snap(kind='init',active=[],detail='等待开始',sorted=[]){frames.push({values:a.slice(),kind,active:active.filter(i=>i>=0&&i<n),detail,sorted:sorted.filter(i=>i>=0&&i<n),comparisons,swaps,writes,pass})}
+ let context={},confirmed=new Set();
+ function snap(kind='init',active=[],detail='等待开始',sorted=[]){frames.push({values:a.slice(),kind,active:active.filter(i=>i>=0&&i<n),detail,sorted:[...new Set([...confirmed,...sorted])].filter(i=>i>=0&&i<n),meta:JSON.parse(JSON.stringify(context)),comparisons,swaps,writes,pass})}
  function cmp(i,j,detail){comparisons++;snap('compare',[i,j],detail||'比较 '+a[i]+' 与 '+a[j])}
  function compareValue(i,value,detail){comparisons++;snap('compare',[i],detail||'比较 '+a[i]+' 与 '+value)}
  function swap(i,j,detail){if(i===j)return;[a[i],a[j]]=[a[j],a[i]];swaps++;writes+=2;snap('swap',[i,j],detail||'交换位置 '+i+' 和 '+j)}
  function write(i,value,detail){a[i]=value;writes++;snap('write',[i],detail||'写入 '+value)}
- function round(detail,sorted=[]){pass++;snap('pass',[],detail,sorted)}
+ function round(detail,sorted=[]){if(['bubble','selection','heap'].includes(algorithm))for(const i of sorted)confirmed.add(i);pass++;snap('pass',[],detail,sorted)}
  snap();
  if(algorithm==='bubble'){
   for(let end=n-1;end>0;end--){let moved=false;for(let i=0;i<end;i++){cmp(i,i+1);if(a[i]>a[i+1]){swap(i,i+1);moved=true}}round(moved?'第 '+pass+' 轮结束：最大值归位':'本轮没有交换，提前结束',Array.from({length:n-end},(_,i)=>end+i));if(!moved)break}
@@ -34,24 +35,24 @@ export function generateTrace(input,algorithm='bubble'){
  }else if(algorithm==='shell'){
   for(let gap=Math.floor(n/2);gap>0;gap=Math.floor(gap/2)){for(let i=gap;i<n;i++){const key=a[i];let j=i;while(j>=gap){compareValue(j-gap,key,'间隔 '+gap+'：比较 '+a[j-gap]+' 与 '+key);if(a[j-gap]<=key)break;write(j,a[j-gap],'间隔 '+gap+'：右移 '+a[j-gap]);j-=gap}write(j,key,'间隔 '+gap+'：插入 '+key)}round('完成一轮 gap = '+gap)}
  }else if(algorithm==='merge'){
-  function merge(l,r){if(r-l<=1)return;let m=l+Math.floor((r-l)/2);merge(l,m);merge(m,r);const left=a.slice(l,m),right=a.slice(m,r);let i=0,j=0,k=l;while(i<left.length&&j<right.length){comparisons++;snap('compare',[l+i,m+j],'归并左右区间：'+left[i]+' vs '+right[j]);if(left[i]<=right[j])write(k++,left[i++],'归并写入左侧值');else write(k++,right[j++],'归并写入右侧值')}while(i<left.length)write(k++,left[i++],'写入左侧余项');while(j<right.length)write(k++,right[j++],'写入右侧余项');round('归并区间 ['+l+', '+(r-1)+']')}merge(0,n)
+  function merge(l,r){if(r-l<=1)return;let m=l+Math.floor((r-l)/2);merge(l,m);merge(m,r);const left=a.slice(l,m),right=a.slice(m,r);let i=0,j=0,k=l;context={type:'merge',left,right,range:[l,r],leftIndex:0,rightIndex:0};while(i<left.length&&j<right.length){context.leftIndex=i;context.rightIndex=j;comparisons++;snap('compare',[k],'归并左右区间：'+left[i]+' vs '+right[j]);if(left[i]<=right[j])write(k++,left[i++],'归并写入左侧值');else write(k++,right[j++],'归并写入右侧值')}while(i<left.length)write(k++,left[i++],'写入左侧余项');while(j<right.length)write(k++,right[j++],'写入右侧余项');round('归并区间 ['+l+', '+(r-1)+']')}merge(0,n)
  }else if(algorithm==='quick'){
-  const stack=[[0,n-1]];while(stack.length){let [lo,hi]=stack.pop();if(lo>=hi)continue;const pivot=a[lo+Math.floor((hi-lo)/2)];let i=lo,j=hi;while(i<=j){while(i<=hi){compareValue(i,pivot,'与枢轴 '+pivot+' 比较');if(a[i]>=pivot)break;i++}while(j>=lo){compareValue(j,pivot,'与枢轴 '+pivot+' 比较');if(a[j]<=pivot)break;j--}if(i<=j){swap(i,j,'围绕枢轴 '+pivot+' 交换');i++;j--}}if(lo<j)stack.push([lo,j]);if(i<hi)stack.push([i,hi]);round('枢轴 '+pivot+' 已分割区间 ['+lo+', '+hi+']')}
+  const stack=[[0,n-1]];while(stack.length){let [lo,hi]=stack.pop();if(lo>=hi)continue;const pivot=a[lo+Math.floor((hi-lo)/2)];let i=lo,j=hi;context={type:'quick',pivot,lo,hi,i,j};while(i<=j){while(i<=hi){context.i=i;context.j=j;compareValue(i,pivot,'与枢轴 '+pivot+' 比较');if(a[i]>=pivot)break;i++}while(j>=lo){context.i=i;context.j=j;compareValue(j,pivot,'与枢轴 '+pivot+' 比较');if(a[j]<=pivot)break;j--}if(i<=j){swap(i,j,'围绕枢轴 '+pivot+' 交换');i++;j--}}if(lo<j)stack.push([lo,j]);if(i<hi)stack.push([i,hi]);round('枢轴 '+pivot+' 已分割区间 ['+lo+', '+hi+']')}
  }else if(algorithm==='heap'){
-  function down(start,end){let root=start;while(root*2+1<=end){let child=root*2+1;if(child+1<=end){cmp(child,child+1,'寻找更大的孩子');if(a[child]<a[child+1])child++}cmp(root,child,'比较堆顶与孩子');if(a[root]>=a[child])return;swap(root,child,'最大堆：交换父子');root=child}}
+  function down(start,end){let root=start;context={type:'heap',root,end};while(root*2+1<=end){let child=root*2+1;context={type:'heap',root,end,left:child,right:child+1<=end?child+1:null};if(child+1<=end){cmp(child,child+1,'寻找更大的孩子');if(a[child]<a[child+1])child++}cmp(root,child,'比较堆顶与孩子');if(a[root]>=a[child])return;swap(root,child,'最大堆：交换父子');root=child}}
   for(let i=Math.floor(n/2)-1;i>=0;i--)down(i,n-1);
   round('最大堆构建完成');
   for(let end=n-1;end>0;end--){swap(0,end,'把当前最大值放到右端');down(0,end-1);round('右侧 '+(n-end)+' 个元素已归位',Array.from({length:n-end},(_,k)=>end+k))}
  }else if(algorithm==='counting'){
-  if(n){const min=Math.min(...a),max=Math.max(...a),counts=new Map();for(let i=0;i<n;i++){counts.set(a[i],(counts.get(a[i])||0)+1);snap('count',[i],'计数 '+a[i]+'，出现 '+counts.get(a[i])+' 次')}let k=0;for(const v of [...counts.keys()].sort((x,y)=>x-y)){while(counts.get(v)>0){write(k++,v,'从计数桶写入 '+v);counts.set(v,counts.get(v)-1)}}round('按整数频次完成写回')}
+  if(n){const min=Math.min(...a),max=Math.max(...a),counts=new Map();for(let i=0;i<n;i++){counts.set(a[i],(counts.get(a[i])||0)+1);context={type:'counting',counts:[...counts.entries()].sort((u,v)=>u[0]-v[0])};snap('count',[i],'计数 '+a[i]+'，出现 '+counts.get(a[i])+' 次')}let k=0;for(const v of [...counts.keys()].sort((x,y)=>x-y)){while(counts.get(v)>0){write(k++,v,'从计数桶写入 '+v);counts.set(v,counts.get(v)-1);context={type:'counting',counts:[...counts.entries()].sort((u,v)=>u[0]-v[0])}}}round('按整数频次完成写回')}
  }else if(algorithm==='radix'){
   if(n){let neg=a.filter(v=>v<0).map(v=>-v),pos=a.filter(v=>v>=0);const mixed=neg.map(v=>-v).concat(pos);for(let i=0;i<n;i++)write(i,mixed[i],'负数与非负数分组');round('分组完成：先处理负数的绝对值');
-   function digits(values,isNeg){if(!values.length)return values;let max=Math.max(...values);for(let exp=1;exp<=max;exp*=10){const buckets=Array.from({length:10},()=>[]);for(const v of values)buckets[Math.floor(v/exp)%10].push(v);values=buckets.flat();const out=isNeg?values.map(v=>-v).concat(pos):neg.map(v=>-v).concat(values);for(let i=0;i<out.length;i++)write(i,out[i],(isNeg?'负数':'非负数')+'按数位 '+exp+' 重排');round((isNeg?'负数':'非负数')+'：完成数位 '+exp);if(exp>Number.MAX_SAFE_INTEGER/10)break}return values}
+   function digits(values,isNeg){if(!values.length)return values;let max=Math.max(...values);for(let exp=1;exp<=max;exp*=10){const buckets=Array.from({length:10},()=>[]);for(const v of values){const digit=Math.floor(v/exp)%10;buckets[digit].push(v);context={type:'radix',exp,digit,buckets:buckets.map(b=>b.slice()),sign:isNeg?'negative':'positive'};snap('bucket',[],'按数位 '+exp+' 将 '+(isNeg?-v:v)+' 放入 '+digit+' 号桶')}values=buckets.flat();const out=isNeg?values.map(v=>-v).concat(pos):neg.map(v=>-v).concat(values);for(let i=0;i<out.length;i++)write(i,out[i],(isNeg?'负数':'非负数')+'按数位 '+exp+' 重排');round((isNeg?'负数':'非负数')+'：完成数位 '+exp);if(exp>Number.MAX_SAFE_INTEGER/10)break}return values}
    neg=digits(neg,true);pos=digits(pos,false);neg.reverse();const out=neg.map(v=>-v).concat(pos);for(let i=0;i<n;i++)write(i,out[i],'拼接有序负数与非负数');round('基数排序完成')
   }
  }else if(algorithm==='bucket'){
   if(n>1){const min=Math.min(...a),max=Math.max(...a),count=Math.max(1,Math.ceil(Math.sqrt(n))),buckets=Array.from({length:count},()=>[]);
-   if(min===max){round('所有数据相等，无需移动')}else{for(let i=0;i<n;i++){const idx=Math.min(count-1,Math.floor((a[i]-min)/(max-min)*count));buckets[idx].push(a[i]);snap('bucket',[i],'将 '+a[i]+' 分配到桶 '+(idx+1)+'/'+count)}round('完成 '+count+' 个桶的分配');let k=0;for(let bi=0;bi<count;bi++){const b=buckets[bi];for(let i=1;i<b.length;i++){const key=b[i];let j=i-1;while(j>=0){comparisons++;snap('compare',[],'桶 '+(bi+1)+' 内部插入排序');if(b[j]<=key)break;b[j+1]=b[j];j--}b[j+1]=key}for(const v of b)write(k++,v,'按序写出桶 '+(bi+1));round('桶 '+(bi+1)+' 合并完成')}}}
+   if(min===max){round('所有数据相等，无需移动')}else{for(let i=0;i<n;i++){const idx=Math.min(count-1,Math.floor((a[i]-min)/(max-min)*count));buckets[idx].push(a[i]);context={type:'bucket',buckets:buckets.map(b=>b.slice()),min,max};snap('bucket',[i],'将 '+a[i]+' 分配到桶 '+(idx+1)+'/'+count)}round('完成 '+count+' 个桶的分配');let k=0;for(let bi=0;bi<count;bi++){const b=buckets[bi];context={type:'bucket',buckets:buckets.map(b=>b.slice()),min,max,selected:bi};for(let i=1;i<b.length;i++){const key=b[i];let j=i-1;while(j>=0){comparisons++;snap('compare',[],'桶 '+(bi+1)+' 内部插入排序');if(b[j]<=key)break;b[j+1]=b[j];j--}b[j+1]=key}for(const v of b)write(k++,v,'按序写出桶 '+(bi+1));round('桶 '+(bi+1)+' 合并完成')}}}
  }
  if(!frames.length||frames[frames.length-1].kind!=='complete'){snap('complete',[],'排序完成！',Array.from({length:n},(_,i)=>i))}
  return frames;
