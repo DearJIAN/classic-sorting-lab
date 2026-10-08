@@ -47,6 +47,6 @@
 
 在仓库根目录执行 `npm test`。自动先检查离线版/浏览器脚本与源码一致，再运行 Node.js 单元测试。
 
-可选：安装 Python Playwright 和 Chromium 后运行 `python tests/browser_smoke.py`。浏览器脚本逐个操作十种算法，验证主题、自定义数组、步进、播放和重置。GitHub Actions 自动运行 `npm test`，浏览器脚本不在当前 CI 中。
+可选：安装 Python Playwright 和 Chromium 后运行 `python tests/browser_smoke.py`。浏览器脚本逐个操作十种算法，验证主题、自定义数组、步进、播放和重置。GitHub Actions 同时运行 `npm test` 与 Playwright Chromium 浏览器交互测试。
 
 **复杂度说明**：页面展示经典算法的复杂度，未计入为教学动画记录全部数组快照的开销。对于只含普通整数的数据，稳定性依照对应算法的经典语义，无法直接观察相等键对象的相对次序。
