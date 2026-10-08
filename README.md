@@ -12,9 +12,10 @@
   <img alt="No runtime dependencies" src="https://img.shields.io/badge/Runtime_Dependencies-0-6f9b8a?style=flat-square">
   <img alt="Offline supported" src="https://img.shields.io/badge/Offline-Supported-438e89?style=flat-square">
   <img alt="Light and dark" src="https://img.shields.io/badge/Themes-Light%20%2F%20Dark-8a7bc9?style=flat-square">
+  <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-3d8068?style=flat-square"></a>
 </p>
 
-[**📦 下载单文件离线版**](web/standalone.html) · [**🚀 快速运行**](#quick-start) · [**🧠 十种算法**](#algorithms) · [**🧪 测试与验证**](#testing)
+[**📦 下载单文件离线版**](web/standalone.html) · [**🚀 快速运行**](#quick-start) · [**🧠 十种算法**](#algorithms) · [**🧪 测试与验证**](#testing) · [**📄 MIT 许可**](#license)
 
 </div>
 
@@ -297,6 +298,15 @@ python tests/browser_smoke.py
 本仓库当前为私有仓库，只有具备权限的账号才能访问。请确认浏览器或 Git 已通过具备访问权的 GitHub 账号认证。
 
 </details>
+
+<a id="license"></a>
+## 📄 开源许可证 / License
+
+本项目采用 **[MIT License](LICENSE)** 授权，版权声明为 **Copyright (c) 2026 DearJIAN**。
+
+你可以在保留原始版权声明及许可证文本的前提下，使用、复制、修改、合并、发布、再许可及销售本项目代码（包括商业用途）。软件按“原样”提供，作者不提供任何明示或暗示的保证；完整法律条款请阅读仓库根目录的 [`LICENSE`](LICENSE)。
+
+> **说明：** MIT 是代码使用许可，不会自动把 GitHub 私有仓库设为公开。当前仓库访问权限保持不变；私有仓库只有获得访问权限的人才能查看代码。
 
 ---
 
