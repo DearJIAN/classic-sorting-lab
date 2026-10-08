@@ -1,114 +1,52 @@
-# Sorting Lab · 十大经典排序算法 + 冒泡排序交互实验室
+# Sorting Lab · 十大经典排序算法交互可视化实验室
 
-> 纯原生 JavaScript、零第三方依赖、中文响应式网页、可重复运行的自动化测试。
+**原生 JavaScript · 零第三方依赖 · 亮色/深色主题 · 单文件离线运行**
 
-![交互式冒泡排序网页预览](docs/preview.svg)
+该项目包含十种经典排序算法的独立 API，以及与每种算法对应的真实逐步事件可视化。不是把其他排序算法套用冒泡排序动画。
 
-本项目实现 **10 大经典排序算法**，并提供独立的 **冒泡排序交互网页**。网页以“一次相邻比较 = 一帧”的方式逐步演示算法运行过程，清晰展示每次比较、是否交换、已排序区间及实时统计。
+## 体验网页
 
-## 项目包含哪些算法？
+- **离线使用**：下载 [web/standalone.html](web/standalone.html)，直接双击浏览器打开，无需安装任何工具。
+- **本地开发**：Node.js ≥ 20，在仓库根目录执行 `npm run dev`，浏览器访问 http://127.0.0.1:4173/。
+- **重新构建**：修改源代码后运行 `npm run build`，同时生成 `web/app.bundle.js` 和 `web/standalone.html`。不要手动编辑构建产物。
 
-| # | 算法 | 导出函数 | 平均时间复杂度 | 额外空间复杂度 | 稳定性 |
-|---|---|---|---|---|---|
-| 01 | 冒泡排序 (Bubble) | `bubbleSort` | O(n²) | O(1) | 稳定 |
-| 02 | 选择排序 (Selection) | `selectionSort` | O(n²) | O(1) | 不稳定 |
-| 03 | 插入排序 (Insertion) | `insertionSort` | O(n²) | O(1) | 稳定 |
-| 04 | 希尔排序 (Shell) | `shellSort` | 依赖增量序列 | O(1) | 不稳定 |
-| 05 | 归并排序 (Merge) | `mergeSort` | O(n log n) | O(n) | 稳定 |
-| 06 | 快速排序 (Quick) | `quickSort` | O(n log n) | O(log n) 平均 | 不稳定 |
-| 07 | 堆排序 (Heap) | `heapSort` | O(n log n) | O(1) | 不稳定 |
-| 08 | 计数排序 (Counting) | `countingSort` | O(n + k) | O(k) | 稳定（返回值意义下） |
-| 09 | 基数排序 (Radix) | `radixSort` | O(d(n + b)) | O(n + b) | 稳定（返回值意义下） |
-| 10 | 桶排序 (Bucket) | `bucketSort` | 期望 O(n + k) | O(n + k) | 稳定（返回值意义下） |
+## 10 种算法及独立动画
 
-注：表中空间复杂度描述的是经典算法主体（排除该项目统一要求的“复制输入”和返回结果的 O(n) 容器成本）。计数排序在取值范围超过 100 万时自动回退至归并排序，避免巨量内存分配。部分非比较排序的“稳定”指实现步骤会保留相同键的原有次序；本项目当前使用普通整数，无法观察相同键的对象身份。
+| 算法 | 动画记录的操作 |
+|---|---|
+| 冒泡 Bubble | 相邻比较、交换、提前退出 |
+| 选择 Selection | 搜索最小值、交换、归位 |
+| 插入 Insertion | 插入比较、右移、写回 |
+| 希尔 Shell | 不同间隔的分组插入 |
+| 归并 Merge | 合并比较、区间写回 |
+| 快速 Quick | 枢轴比较、分区交换 |
+| 堆 Heap | 堆构建、调整、最大值归位 |
+| 计数 Counting | 频次统计、按值写回 |
+| 基数 Radix | 符号分组、逐位分桶与写回 |
+| 桶 Bucket | 分配桶、桶内排序、拼接 |
 
-## 立即运行网页
+## 交互功能
 
-Node.js >= 20：
+- 选择 10 种排序算法，切换算法时保留同一初始数据；可点击开始、暂停、继续、上一步、下一步、重置。
+- 1～5 倍速度控制；数组长度 2～48；随机、逆序、近乎有序和有序预设。
+- 自定义整数数组（每项 -999～999），支持重复值和负数；输入后点击「应用自定义数组」。
+- 统计比较数、交换数、写入数、轮次及进度；同步显示操作说明、复杂度、稳定性、伪代码。
+- 默认亮色主题，顶部按钮切换深色主题，并在支持本地存储的浏览器记住选择。
+- 快捷键：非输入状态下 Space 播放/暂停、← 上一步、→ 下一步；移动端自适应。
 
-```bash
-npm run dev
-```
+## 核心结构
 
-然后打开浏览器 **http://127.0.0.1:4173/**。无需 npm install（没有外部依赖）。
+- `src/sorts.js`：十种排序算法的非原地 API（接受安全整数，返回新升序数组）。
+- `src/trace-engine.js`：十种排序算法的事件记录器，每帧记录数组快照、活动元素和累计指标。
+- `src/bubble-machine.js`：保留旧版冒泡状态机以兼容既有测试。
+- `web/index.html`：UI 页面；`web/app.js`：动画、事件、用户交互；`web/styles.css`：双主题。
+- `scripts/build-web.mjs`：生成并校验浏览器脚本和单文件离线版。
+- `tests/trace-engine.test.js`、`tests/sorts.test.js`、`tests/web-assets.test.js` 等：算法、网页绑定、构建产物测试。
 
-如果已有 Python 3，也可在仓库根目录运行 `python -m http.server 4173`，并访问 `http://127.0.0.1:4173/web/`。
+## 测试
 
-注意：网页使用原生 ES Modules，需要通过本地 HTTP 服务运行；直接双击 `web/index.html` 可能受到浏览器的 `file://` 模块安全限制。
+在仓库根目录执行 `npm test`。自动先检查离线版/浏览器脚本与源码一致，再运行 Node.js 单元测试。
 
-### 网页交互
+可选：安装 Python Playwright 和 Chromium 后运行 `python tests/browser_smoke.py`。浏览器脚本逐个操作十种算法，验证主题、自定义数组、步进、播放和重置。GitHub Actions 自动运行 `npm test`，浏览器脚本不在当前 CI 中。
 
-- **开始 / 暂停 / 继续 / 重置**：根据当前状态控制运行。
-- **单步执行**：每点击一次只推进一次相邻元素比较（可能伴随一次交换）。
-- **调整速度**：1×～5×；可在运行中调整。
-- **修改数组长度**：5～48 个元素，重新生成初始数据。
-- **选择数据分布**：随机、逆序、近乎有序、完全有序。
-- **自定义数组**：输入 2～48 个整数（-999～999），支持负数和重复值。
-- **即时可视化**：橙色正在比较，绿色表示确认有序，蓝绿表示尚未有序。
-- **算法学习**：比较次数、交换次数、完成轮次、复杂度、稳定性和伪代码。
-- **键盘快捷键**：焦点不在输入框/按钮等交互控件上时，`Space` 播放/暂停、`→` 单步。
-
-## 如何调用排序算法
-
-```js
-import { algorithms, quickSort, mergeSort } from './src/sorts.js';
-const data = [8, -1, 3, 8, 5];
-console.log(quickSort(data));      // [-1, 3, 5, 8, 8]
-console.log(mergeSort(data));      // [-1, 3, 5, 8, 8]
-console.log(algorithms.bubble.sort(data)); // [-1, 3, 5, 8, 8]
-console.log(data); // [8, -1, 3, 8, 5] — 原数组未更改
-```
-
-**统一约束**：API 只接受 `Number.isSafeInteger` 范围内的整数数组，并且都返回新的升序数组，不直接修改调用方输入。
-
-## 自动化测试
-
-```bash
-npm test
-```
-
-在具备 Python Playwright + Chromium 的环境中还可以运行 `python tests/browser_smoke.py`，验证自定义输入、开始暂停、单步执行、预设生成，以及单文件离线版等真实浏览器行为。
-
-测试覆盖 10 种算法的空数组、单元素、逆序、有序、重复数、负数、极大整数、70 组伪随机数组、输入不可变性，以及冒泡状态机的逐步推进、提前结束和终止性。
-
-## 目录结构
-
-```text
-classic-sorting-lab/
-├── README.md
-├── package.json
-├── src/
-│   ├── sorts.js             # 十大经典排序算法，统一 API
-│   └── bubble-machine.js    # 冒泡排序的逐比较状态机
-├── web/
-│   ├── index.html           # 网页结构、算法知识面板
-│   ├── styles.css           # 深色响应式页面、排序动画
-│   └── app.js               # 播放/暂停/调速/自定义输入/渲染
-├── scripts/
-│   └── dev-server.mjs       # 无依赖本地 HTTP 服务
-├── tests/
-│   ├── sorts.test.js
-│   └── bubble-machine.test.js
-└── .github/workflows/test.yml  # push/PR 自动执行 npm test
-```
-
-## 设计说明
-
-- 为保证算法可独立运行，`src/sorts.js` 与网页 UI 解耦。
-- 为保证单步行为可测试，`BubbleMachine.step()` 只进行一次相邻比较，不依赖计时器或 DOM。
-- 为避免排序动画与 UI 状态脱节，播放按钮只驱动一个计时循环；切换数组、重置或暂停都会取消旧计时器。
-- 已排序区间只在每轮结束后确认；如果一整轮未交换，则触发提前终止。
-- 页面所用的 SVG/字体/样式全部本地实现，没有使用外部 CDN。
-
-## 上传至 GitHub 私有仓库
-
-如果已经在本地安装并登录 [GitHub CLI](https://cli.github.com/)，解压后进入项目目录，执行：
-
-```bash
-bash scripts/publish-github.sh classic-sorting-lab
-```
-
-这个脚本会在已登录的 GitHub 账号下创建一个**新的私有仓库**并推送代码；不会覆盖现有 `origin` 仓库。如果还没有 GitHub CLI，请先安装并运行 `gh auth login`。
-
-项目源码也可以提交到任何你有写入权限的 GitHub 私有仓库。私有仓库默认不能作为对外公开的 GitHub Pages 站点使用，是否支持 Pages 取决于你的 GitHub 套餐和仓库设置；本地运行不受影响。
+**复杂度说明**：页面展示经典算法的复杂度，未计入为教学动画记录全部数组快照的开销。对于只含普通整数的数据，稳定性依照对应算法的经典语义，无法直接观察相等键对象的相对次序。
