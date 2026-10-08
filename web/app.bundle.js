@@ -87,6 +87,64 @@ function generateTrace(input,algorithm='bubble'){
  return frames;
 }
 
+
+/**
+ * Reproducible, serializable dual-algorithm experiment.
+ * The comparison is between educational event traces, not elapsed CPU time.
+ * Progress on the two canvases is aligned by 0..100% of each trace's length,
+ * never by pretending that heterogeneous operations take equal wall time.
+ */
+function createExperimentReport(input,leftKey,rightKey,providedFrames){
+ if(!Array.isArray(input)||!input.every(Number.isSafeInteger))throw new TypeError('Expected integer input');
+ if(input.length<2||input.length>48)throw new RangeError('Experiment input length must be 2..48');
+ if(!Object.hasOwn(catalog,leftKey)||!Object.hasOwn(catalog,rightKey))throw new RangeError('Unknown comparison algorithm');
+ if(leftKey===rightKey)throw new RangeError('Select two different algorithms');
+ const algorithms=[leftKey,rightKey];
+ return {
+  schemaVersion:'sorting-lab-v3.0',
+  generatedAt:new Date().toISOString(),
+  synchronization:'normalized-progress',
+  disclaimer:'教学事件统计；比较/交换/写入和轮次口径因算法而异，并非运行耗时或性能基准。',
+  input:input.slice(),
+  results:algorithms.map((key,i)=>{
+   const frames=(providedFrames&&providedFrames[i])||generateTrace(input,key);
+   if(!Array.isArray(frames)||!frames.length||frames[0].values.join(',')!==input.join(','))
+    throw new TypeError('Experiment frames do not match the initial input');
+   const last=frames.at(-1);
+   if(last.kind!=='complete')throw new TypeError('Experiment trace is incomplete');
+   return {
+    algorithm:key,name:catalog[key].name,frameCount:frames.length,
+    totals:{comparisons:last.comparisons,swaps:last.swaps,writes:last.writes,pass:last.pass},
+    finalValues:last.values.slice(),
+    frames:frames.map((f,index)=>({
+     step:index,progress:Number((index/Math.max(1,frames.length-1)).toFixed(6)),
+     kind:f.kind,detail:f.detail,values:f.values.slice(),
+     active:f.active.slice(),sorted:f.sorted.slice(),localSorted:(f.localSorted||[]).slice(),
+     comparisons:f.comparisons,swaps:f.swaps,writes:f.writes,pass:f.pass,
+     meta:f.meta
+    }))
+   };
+  })
+ };
+}
+/** One CSV row per actual event, ordered by algorithm then native trace index. */
+function experimentReportToCsv(report){
+ const escape=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+ const columns=['algorithm','name','step','progress','kind','detail','values','active','sorted','comparisons','swaps','writes','pass'];
+ const lines=[columns.join(',')];
+ for(const result of report.results){
+  for(const f of result.frames){
+   const values=[
+    result.algorithm,result.name,f.step,f.progress,f.kind,f.detail,
+    JSON.stringify(f.values),JSON.stringify(f.active),JSON.stringify(f.sorted),
+    f.comparisons,f.swaps,f.writes,f.pass
+   ];
+   lines.push(values.map(escape).join(','));
+  }
+ }
+ return '\uFEFF'+lines.join('\r\n')+'\r\n';
+}
+
 const $ = id => document.getElementById(id);
 const ui={
  options:$('algorithmGrid'),bars:$('bars'),name:$('algorithmTitle'),
@@ -103,9 +161,23 @@ const ui={
  hint:$('stepHint'),timeline:$('timelineRange'),chapter:$('chapterHint'),
  chartArea:$('chartArea'),zero:$('zeroLine'),scale:$('scaleLabel'),
  inspector:$('inspectorVisual'),inspectorCaption:$('inspectorCaption'),
- compareSelect:$('compareSelect'),compare:$('compareBtn'),comparison:$('comparisonResult')
+ compareSelect:$('compareSelect'),compare:$('compareBtn'),comparison:$('comparisonResult'),
+ dualWorkspace:$('dualWorkspace'),dualTimeline:$('dualTimeline'),
+ dualProgressText:$('dualProgressText'),dualPlay:$('dualPlayBtn'),dualPause:$('dualPauseBtn'),
+ dualBack:$('dualBackBtn'),dualNext:$('dualNextBtn'),dualReset:$('dualResetBtn'),
+ dualSpeed:$('dualSpeed'),dualSpeedOutput:$('dualSpeedOutput'),dualExportJson:$('dualExportJson'),
+ dualExportCsv:$('dualExportCsv'),dualExportStatus:$('dualExportStatus'),
+ dualNameLeft:$('dualNameLeft'),dualNameRight:$('dualNameRight'),
+ dualBarsLeft:$('dualBarsLeft'),dualBarsRight:$('dualBarsRight'),
+ dualZeroLeft:$('dualZeroLeft'),dualZeroRight:$('dualZeroRight'),
+ dualScaleLeft:$('dualScaleLeft'),dualScaleRight:$('dualScaleRight'),
+ dualFrameLeft:$('dualFrameLeft'),dualFrameRight:$('dualFrameRight'),
+ dualActivityLeft:$('dualActivityLeft'),dualActivityRight:$('dualActivityRight'),
+ dualStatsLeft:$('dualStatsLeft'),dualStatsRight:$('dualStatsRight')
 };
 let algorithm='bubble',initial=[],frames=[],cursor=0,running=false,timer=null,theme='light',barNodes=[];
+const dual={left:null,right:null,leftFrames:[],rightFrames:[],report:null,progress:0,running:false,timer:null,
+ nodes:{left:[],right:[]}};
 const keys=Object.keys(catalog);
 const random=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const htmlEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -123,7 +195,7 @@ function rebuild(values){
  ui.sizeRange.value=String(Math.max(2,Math.min(48,values.length)));
  ui.sizeOutput.textContent=values.length;
  ui.timeline.max=String(Math.max(1,frames.length-1));ui.timeline.value='0';
- barNodes=[];ui.bars.replaceChildren();ui.comparison.replaceChildren();render();
+ barNodes=[];ui.bars.replaceChildren();invalidateDual();ui.comparison.replaceChildren();render();
 }
 function speed(){return Math.round(860/Math.pow(1.9,Number(ui.speedRange.value)-1))}
 function animate(){if(!running)return;if(cursor>=frames.length-1){stop();render();return}const prev=cursor;cursor++;render(prev);if(running)timer=setTimeout(animate,speed())}
@@ -376,13 +448,127 @@ function switchTab(name){
  });
  const panels={explain:'panelExplain',pseudocode:'panelCode',profile:'panelProfile',compare:'panelCompare'};
  Object.entries(panels).forEach(([key,id])=>$(id).hidden=key!==name);
+ if(name==='compare'&&!dual.report&&initial.length>=2)compareAlgorithms();
+ else if(name!=='compare'&&dual.running)pauseDual();
 }
+function invalidateDual(){
+ stopDual();dual.left=null;dual.right=null;dual.report=null;dual.leftFrames=[];dual.rightFrames=[];
+ dual.progress=0;dual.nodes={left:[],right:[]};
+ ui.dualWorkspace.hidden=true;ui.dualProgressText.textContent='0.0%';
+ ui.dualTimeline.value='0';ui.dualExportStatus.textContent='';
+}
+function stopDual(){dual.running=false;if(dual.timer!==null)clearTimeout(dual.timer);dual.timer=null}
 function compareAlgorithms(){
- const key=ui.compareSelect.value;if(!Object.hasOwn(catalog,key))return;
- const a=frames.at(-1),other=generateTrace(initial,key).at(-1);
+ stop();
+ const right=ui.compareSelect.value;
+ if(!Object.hasOwn(catalog,right)||right===algorithm)return;
+ invalidateDual();
+ dual.left=algorithm;dual.right=right;dual.leftFrames=frames;
+ dual.rightFrames=generateTrace(initial,right);
+ dual.report=createExperimentReport(initial,dual.left,dual.right,[dual.leftFrames,dual.rightFrames]);
+ ui.dualNameLeft.textContent=catalog[dual.left].name+' / '+catalog[dual.left].english;
+ ui.dualNameRight.textContent=catalog[dual.right].name+' / '+catalog[dual.right].english;
+ ui.dualWorkspace.hidden=false;
+ ui.dualBarsLeft.replaceChildren();ui.dualBarsRight.replaceChildren();
+ ui.dualStatsLeft.replaceChildren();ui.dualStatsRight.replaceChildren();
+ ui.dualExportStatus.textContent='';
+ renderDual();
  const metrics=[['比较次数','comparisons'],['交换次数','swaps'],['写入次数','writes'],['轮次','pass']];
- const output=metrics.map(([label,prop])=>'<tr><th scope="row">'+label+'</th><td>'+a[prop]+'</td><td>'+other[prop]+'</td></tr>').join('');
- ui.comparison.innerHTML='<table class="compare-table"><thead><tr><th scope="col">教学操作计数</th><th scope="col">'+htmlEscape(catalog[algorithm].name)+'</th><th scope="col">'+htmlEscape(catalog[key].name)+'</th></tr></thead><tbody>'+output+'</tbody></table><p class="compare-note">两种算法使用完全相同的初始数据。表中数据来自各自的完整事件追踪；写入和轮次统计并非跨算法统一的物理成本，也不等于实际执行时间。</p>';
+ const output=metrics.map(([label,prop])=>'<tr><th scope="row">'+label+'</th><td>'+dual.report.results[0].totals[prop]+'</td><td>'+dual.report.results[1].totals[prop]+'</td></tr>').join('');
+ ui.comparison.innerHTML='<table class="compare-table"><thead><tr><th scope="col">全流程事件计数</th><th scope="col">'+htmlEscape(catalog[dual.left].name)+'</th><th scope="col">'+htmlEscape(catalog[dual.right].name)+'</th></tr></thead><tbody>'+output+'</tbody></table><p class="compare-note">相同初始数组：['+initial.join(', ')+']。两侧按照各自总帧数的比例同步推进；单步操作及计数口径不同，不能当作算法运行时间比较。</p>';
+}
+function makeDualBars(side,n){
+ const el=side==='left'?ui.dualBarsLeft:ui.dualBarsRight,frag=document.createDocumentFragment(),nodes=[];
+ for(let i=0;i<n;i++){
+  const track=document.createElement('div');track.className='dual-bar-track';
+  const bar=document.createElement('div');bar.className='dual-bar';
+  const label=document.createElement('span');label.className='dual-bar-label';bar.append(label);
+  track.append(bar);frag.append(track);nodes.push({bar,label});
+ }
+ el.replaceChildren(frag);dual.nodes[side]=nodes;
+}
+function renderDualSide(side){
+ const left=side==='left',framesForSide=left?dual.leftFrames:dual.rightFrames;
+ const frameIndex=Math.round((framesForSide.length-1)*dual.progress/1000);
+ const f=framesForSide[frameIndex];
+ const barsEl=left?ui.dualBarsLeft:ui.dualBarsRight,zeroEl=left?ui.dualZeroLeft:ui.dualZeroRight;
+ const scaleEl=left?ui.dualScaleLeft:ui.dualScaleRight;
+ const frameEl=left?ui.dualFrameLeft:ui.dualFrameRight,activityEl=left?ui.dualActivityLeft:ui.dualActivityRight;
+ const statsEl=left?ui.dualStatsLeft:ui.dualStatsRight;
+ const n=f.values.length;if(dual.nodes[side].length!==n)makeDualBars(side,n);
+ const min=Math.min(0,...initial),max=Math.max(0,...initial),range=Math.max(1,max-min),zero=(0-min)/range*100;
+ zeroEl.style.bottom='calc(18px + (100% - 36px) * '+(zero/100)+')';
+ scaleEl.textContent='['+min+', '+max+']';
+ frameEl.textContent=frameIndex+' / '+(framesForSide.length-1);
+ activityEl.textContent=f.detail;
+ const active=new Set(f.active),sorted=new Set(f.sorted),localSorted=new Set(f.localSorted||[]);
+ for(let i=0;i<n;i++){
+  const v=f.values[i],item=dual.nodes[side][i],bar=item.bar;
+  bar.className='dual-bar'+(v<0?' negative':'');
+  if(f.kind==='complete'||sorted.has(i))bar.classList.add('sorted');
+  else if(active.has(i))bar.classList.add(f.kind==='swap'?'swapping':f.kind==='write'||f.kind==='bucket-write'?'writing':'comparing');
+  else if(localSorted.has(i))bar.classList.add('local-sorted');
+  bar.style.bottom=(v>=0?zero:zero+v/range*100)+'%';
+  bar.style.height=Math.max(.7,Math.abs(v)/range*100)+'%';
+  item.label.textContent=n<=20?String(v):'';
+  bar.title='下标 '+i+'：'+v;
+ }
+ barsEl.setAttribute('aria-label',(left?'算法 A':'算法 B')+'，数组：'+f.values.join('，'));
+ const metrics=[['比较',f.comparisons],['交换',f.swaps],['写入',f.writes],['轮次',f.pass]];
+ // Keep the stats nodes alive; update only their values for smooth playback.
+ if(statsEl.children.length!==metrics.length){
+  statsEl.innerHTML=metrics.map(([label])=>'<div><small>'+label+'</small><strong>0</strong></div>').join('');
+ }
+ metrics.forEach(([,value],i)=>{statsEl.children[i].querySelector('strong').textContent=String(value)});
+}
+function renderDual(){
+ if(!dual.report)return;
+ renderDualSide('left');renderDualSide('right');
+ ui.dualTimeline.value=String(dual.progress);
+ ui.dualProgressText.textContent=(dual.progress/10).toFixed(1)+'%';
+ const finished=dual.progress>=1000;
+ ui.dualPlay.textContent=finished?'↻ 从头播放':dual.running?'● 正在同步播放':dual.progress?'▶ 继续同步播放':'▶ 同步播放';
+ ui.dualPause.disabled=!dual.running;
+ ui.dualBack.disabled=dual.progress===0;
+ ui.dualNext.disabled=finished;
+}
+function advanceDual(){
+ if(!dual.running)return;
+ const speeds=[0,2,3,5,9,15],tick=speeds[Number(ui.dualSpeed.value)]||5;
+ dual.progress=Math.min(1000,dual.progress+tick);
+ if(dual.progress===1000)stopDual();
+ renderDual();
+ if(dual.running)dual.timer=setTimeout(advanceDual,70);
+}
+function playDual(){
+ if(!dual.report)return;
+ if(dual.running)return;
+ if(dual.progress===1000)dual.progress=0;
+ dual.running=true;renderDual();dual.timer=setTimeout(advanceDual,70);
+}
+function pauseDual(){stopDual();renderDual()}
+function seekDual(progress){
+ stopDual();dual.progress=Math.min(1000,Math.max(0,Math.round(progress)||0));renderDual();
+}
+function stepDual(direction){
+ if(!dual.report)return;
+ // One shared tick corresponds to at least one frame on the longer native trace.
+ const total=Math.max(dual.leftFrames.length-1,dual.rightFrames.length-1,1);
+ const quantum=Math.max(1,Math.ceil(1000/total));
+ seekDual(dual.progress+direction*quantum);
+}
+function downloadDual(format){
+ if(!dual.report)return;
+ const stamp=dual.report.generatedAt.replace(/[:.]/g,'-');
+ const filename='sorting-lab-'+dual.left+'-vs-'+dual.right+'-'+stamp+'.'+format;
+ const contents=format==='csv'?experimentReportToCsv(dual.report):JSON.stringify(dual.report,null,2);
+ const type=format==='csv'?'text/csv;charset=utf-8':'application/json;charset=utf-8';
+ const url=URL.createObjectURL(new Blob([contents],{type}));
+ try{
+  const link=document.createElement('a');link.href=url;link.download=filename;
+  document.body.append(link);link.click();link.remove();
+  ui.dualExportStatus.textContent='✓ 已请求导出 '+format.toUpperCase()+'：'+filename;
+ }finally{setTimeout(()=>URL.revokeObjectURL(url),2000)}
 }
 ui.options.addEventListener('click',e=>{const b=e.target.closest('[data-algo]');if(b)selectAlgorithm(b.dataset.algo)});
 ui.play.addEventListener('click',play);ui.pause.addEventListener('click',pause);
@@ -398,13 +584,23 @@ ui.custom.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();
 ui.theme.addEventListener('click',()=>applyTheme(theme==='light'?'dark':'light'));
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 ui.compare.addEventListener('click',compareAlgorithms);
+ui.dualPlay.addEventListener('click',playDual);
+ui.dualPause.addEventListener('click',pauseDual);
+ui.dualBack.addEventListener('click',()=>stepDual(-1));
+ui.dualNext.addEventListener('click',()=>stepDual(1));
+ui.dualReset.addEventListener('click',()=>seekDual(0));
+ui.dualTimeline.addEventListener('input',()=>seekDual(Number(ui.dualTimeline.value)));
+ui.dualSpeed.addEventListener('input',()=>ui.dualSpeedOutput.textContent=ui.dualSpeed.value+'×');
+ui.dualExportJson.addEventListener('click',()=>downloadDual('json'));
+ui.dualExportCsv.addEventListener('click',()=>downloadDual('csv'));
+ui.compareSelect.addEventListener('change',compareAlgorithms);
 document.addEventListener('keydown',e=>{
  if(e.ctrlKey||e.metaKey||e.altKey||['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;
  if(e.code==='Space'){e.preventDefault();running?pause():play()}
  else if(e.code==='ArrowRight'){e.preventDefault();step()}
  else if(e.code==='ArrowLeft'){e.preventDefault();back()}
 });
-window.addEventListener('blur',()=>{if(running)pause()});
+window.addEventListener('blur',()=>{if(running)pause();if(dual.running)pauseDual()});
 try{theme=localStorage.getItem('sorting-lab-theme')==='dark'?'dark':'light'}catch{}
 applyTheme(theme);drawAlgorithms();drawDetails();switchTab('explain');rebuild(makeData(22,'random'));
 

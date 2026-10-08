@@ -67,6 +67,63 @@
 }
 @media(prefers-reduced-motion:reduce){.heap-edge,.heap-circle,.counting-track i{transition:none!important}}
 
+
+/* V3 dual-algorithm lab: independent trace panes with a shared, normalized clock */
+.dual-heading{display:flex;justify-content:space-between;align-items:start;gap:14px}
+.dual-heading h3{font-size:23px;letter-spacing:-.6px;margin:6px 0}
+.dual-heading p{margin:0 0 14px!important;max-width:800px}
+.dual-pill{font:700 10px ui-monospace,Consolas,monospace;white-space:nowrap;border:1px solid var(--line);border-radius:20px;background:var(--soft);color:var(--green);padding:8px 12px}
+.dual-explain{color:var(--muted);font-size:11px!important;line-height:1.7;margin:13px 0!important}
+#dualWorkspace[hidden]{display:none}
+.dual-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:18px 0}
+.dual-pane{min-width:0;border:1px solid var(--line);background:var(--panel);border-radius:13px;overflow:hidden}
+.dual-pane-title{padding:15px 17px 12px;display:grid;grid-template-columns:1fr auto;gap:4px;align-items:baseline}
+.dual-side{font:700 10px ui-monospace,Consolas,monospace;letter-spacing:1px;color:var(--green);grid-column:1/-1}
+.dual-pane-title h4{font-size:17px;margin:0;line-height:1.3}
+.dual-frame{font:700 11px ui-monospace,Consolas,monospace;color:var(--muted)}
+.dual-chart{margin:0 13px;background:var(--chart);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.dual-scale{display:flex;justify-content:space-between;color:var(--muted);font:700 10px ui-monospace,Consolas,monospace;letter-spacing:.4px;padding:9px 12px;border-bottom:1px solid var(--line)}
+.dual-chart-area{height:247px;position:relative}
+.dual-gridlines{position:absolute;inset:12px 0;background:repeating-linear-gradient(to bottom,transparent,transparent 51px,var(--grid) 52px,transparent 53px);pointer-events:none;opacity:.55}
+.dual-bars{position:absolute;inset:18px 8px;display:flex;align-items:stretch;gap:clamp(1px,.24vw,5px);justify-content:center}
+.dual-bar-track{position:relative;flex:1;min-width:0;max-width:38px;height:100%}
+.dual-bar{position:absolute;left:3%;width:94%;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--bar);transition:background .1s}
+.dual-bar.comparing{background:var(--compare)}.dual-bar.swapping{background:var(--swap)}
+.dual-bar.writing{background:var(--write)}.dual-bar.sorted{background:var(--sorted)}
+.dual-bar.local-sorted{background:repeating-linear-gradient(135deg,var(--soft),var(--soft) 5px,var(--sorted) 5px,var(--sorted) 8px);outline:1px solid var(--sorted)}
+.dual-bar-label{position:absolute;bottom:calc(100% + 3px);left:50%;transform:translateX(-50%);white-space:nowrap;color:var(--ink);font:700 9px Consolas,monospace}
+.dual-bar.negative .dual-bar-label{bottom:auto;top:calc(100% + 3px)}
+.dual-zero{position:absolute;left:6px;right:6px;border-top:2px solid var(--zero);font:700 10px ui-monospace,Consolas,monospace;color:var(--muted);pointer-events:none;padding-left:4px;z-index:1}
+.dual-activity{padding:11px 13px;margin:10px 13px!important;background:var(--soft);border-radius:8px;min-height:46px;font-size:11px!important;line-height:1.6!important}
+.dual-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:0 13px 13px}
+.dual-stats>div{background:var(--sub);border:1px solid var(--line);border-radius:7px;padding:10px 7px;min-width:0}
+.dual-stats small{display:block;color:var(--muted);font-size:10px}
+.dual-stats strong{display:block;color:var(--green);font:700 18px Consolas,monospace;margin-top:5px}
+.dual-transport{padding:18px;border:1px solid var(--line);border-radius:13px;background:var(--sub)}
+.dual-timeline-header{display:flex;justify-content:space-between;align-items:center;gap:14px}
+.dual-timeline-header label{font-size:12px}.dual-timeline-header label span{color:var(--muted);font-size:11px;margin-left:9px}
+.dual-timeline-header output{font:800 17px ui-monospace,Consolas,monospace;color:var(--green)}
+#dualTimeline{width:100%;accent-color:var(--green);cursor:pointer;margin:16px 0;min-height:14px}
+.dual-control-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dual-control-row .btn{white-space:nowrap}
+.dual-control-row>label{margin-left:auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap}
+#dualSpeed{width:105px;accent-color:var(--green);cursor:pointer}
+.dual-report{margin-top:18px;border:1px solid var(--line);border-radius:13px;padding:16px}
+.dual-report-header{display:flex;align-items:start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.dual-report-header h4{margin:0 0 4px;font-size:16px}
+.dual-report-header p{margin:0!important;font-size:11px!important}
+.dual-export{display:flex;gap:8px;flex-wrap:wrap}
+.dual-export .btn{background:var(--soft);color:var(--green);border-color:var(--line)}
+.dual-export-status{margin:10px 0 0!important;color:var(--green)!important;font-size:12px!important}
+#panelCompare .compare-table{margin-top:15px}
+#panelCompare .compare-table th:first-child{text-align:left}
+#panelCompare .compare-table th:not(:first-child),#panelCompare .compare-table td{text-align:right}
+#panelCompare .compare-table td{color:var(--green)}
+@media(max-width:1050px){.dual-grid{gap:9px}.dual-pane-title{padding:12px}.dual-chart{margin:0 8px}.dual-stats{padding:0 8px 9px;gap:5px}.dual-stats>div{padding:8px 4px}.dual-stats strong{font-size:16px}}
+@media(max-width:820px){.dual-grid{grid-template-columns:1fr}.dual-chart-area{height:235px}.dual-pane-title h4{font-size:18px}.dual-stats{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:600px){.dual-heading{flex-direction:column;gap:3px}.dual-heading h3{font-size:20px}.dual-pill{align-self:flex-start}.dual-transport,.dual-report{padding:11px}.dual-pane-title h4{font-size:15px}.dual-chart-area{height:225px}.dual-timeline-header label span{display:none}.dual-control-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.dual-control-row .btn{white-space:normal;min-width:0;padding:9px 5px}.dual-control-row>label{margin:0;justify-content:start}.dual-control-row>input{width:100%!important}.dual-export{width:100%}.dual-export .btn{flex:1;min-width:130px}.dual-stats small{font-size:9px}.dual-stats strong{font-size:17px}#panelCompare .compare-table{font-size:11px}#panelCompare .compare-table th,#panelCompare .compare-table td{padding:9px 5px}}
+@media(prefers-reduced-motion:reduce){.dual-bar{transition:none!important}}
+
 </style><script>
 /* Generated by npm run build. Edit source files, not this bundle. */
 (()=>{
@@ -157,6 +214,64 @@ function generateTrace(input,algorithm='bubble'){
  return frames;
 }
 
+
+/**
+ * Reproducible, serializable dual-algorithm experiment.
+ * The comparison is between educational event traces, not elapsed CPU time.
+ * Progress on the two canvases is aligned by 0..100% of each trace's length,
+ * never by pretending that heterogeneous operations take equal wall time.
+ */
+function createExperimentReport(input,leftKey,rightKey,providedFrames){
+ if(!Array.isArray(input)||!input.every(Number.isSafeInteger))throw new TypeError('Expected integer input');
+ if(input.length<2||input.length>48)throw new RangeError('Experiment input length must be 2..48');
+ if(!Object.hasOwn(catalog,leftKey)||!Object.hasOwn(catalog,rightKey))throw new RangeError('Unknown comparison algorithm');
+ if(leftKey===rightKey)throw new RangeError('Select two different algorithms');
+ const algorithms=[leftKey,rightKey];
+ return {
+  schemaVersion:'sorting-lab-v3.0',
+  generatedAt:new Date().toISOString(),
+  synchronization:'normalized-progress',
+  disclaimer:'教学事件统计；比较/交换/写入和轮次口径因算法而异，并非运行耗时或性能基准。',
+  input:input.slice(),
+  results:algorithms.map((key,i)=>{
+   const frames=(providedFrames&&providedFrames[i])||generateTrace(input,key);
+   if(!Array.isArray(frames)||!frames.length||frames[0].values.join(',')!==input.join(','))
+    throw new TypeError('Experiment frames do not match the initial input');
+   const last=frames.at(-1);
+   if(last.kind!=='complete')throw new TypeError('Experiment trace is incomplete');
+   return {
+    algorithm:key,name:catalog[key].name,frameCount:frames.length,
+    totals:{comparisons:last.comparisons,swaps:last.swaps,writes:last.writes,pass:last.pass},
+    finalValues:last.values.slice(),
+    frames:frames.map((f,index)=>({
+     step:index,progress:Number((index/Math.max(1,frames.length-1)).toFixed(6)),
+     kind:f.kind,detail:f.detail,values:f.values.slice(),
+     active:f.active.slice(),sorted:f.sorted.slice(),localSorted:(f.localSorted||[]).slice(),
+     comparisons:f.comparisons,swaps:f.swaps,writes:f.writes,pass:f.pass,
+     meta:f.meta
+    }))
+   };
+  })
+ };
+}
+/** One CSV row per actual event, ordered by algorithm then native trace index. */
+function experimentReportToCsv(report){
+ const escape=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+ const columns=['algorithm','name','step','progress','kind','detail','values','active','sorted','comparisons','swaps','writes','pass'];
+ const lines=[columns.join(',')];
+ for(const result of report.results){
+  for(const f of result.frames){
+   const values=[
+    result.algorithm,result.name,f.step,f.progress,f.kind,f.detail,
+    JSON.stringify(f.values),JSON.stringify(f.active),JSON.stringify(f.sorted),
+    f.comparisons,f.swaps,f.writes,f.pass
+   ];
+   lines.push(values.map(escape).join(','));
+  }
+ }
+ return '\uFEFF'+lines.join('\r\n')+'\r\n';
+}
+
 const $ = id => document.getElementById(id);
 const ui={
  options:$('algorithmGrid'),bars:$('bars'),name:$('algorithmTitle'),
@@ -173,9 +288,23 @@ const ui={
  hint:$('stepHint'),timeline:$('timelineRange'),chapter:$('chapterHint'),
  chartArea:$('chartArea'),zero:$('zeroLine'),scale:$('scaleLabel'),
  inspector:$('inspectorVisual'),inspectorCaption:$('inspectorCaption'),
- compareSelect:$('compareSelect'),compare:$('compareBtn'),comparison:$('comparisonResult')
+ compareSelect:$('compareSelect'),compare:$('compareBtn'),comparison:$('comparisonResult'),
+ dualWorkspace:$('dualWorkspace'),dualTimeline:$('dualTimeline'),
+ dualProgressText:$('dualProgressText'),dualPlay:$('dualPlayBtn'),dualPause:$('dualPauseBtn'),
+ dualBack:$('dualBackBtn'),dualNext:$('dualNextBtn'),dualReset:$('dualResetBtn'),
+ dualSpeed:$('dualSpeed'),dualSpeedOutput:$('dualSpeedOutput'),dualExportJson:$('dualExportJson'),
+ dualExportCsv:$('dualExportCsv'),dualExportStatus:$('dualExportStatus'),
+ dualNameLeft:$('dualNameLeft'),dualNameRight:$('dualNameRight'),
+ dualBarsLeft:$('dualBarsLeft'),dualBarsRight:$('dualBarsRight'),
+ dualZeroLeft:$('dualZeroLeft'),dualZeroRight:$('dualZeroRight'),
+ dualScaleLeft:$('dualScaleLeft'),dualScaleRight:$('dualScaleRight'),
+ dualFrameLeft:$('dualFrameLeft'),dualFrameRight:$('dualFrameRight'),
+ dualActivityLeft:$('dualActivityLeft'),dualActivityRight:$('dualActivityRight'),
+ dualStatsLeft:$('dualStatsLeft'),dualStatsRight:$('dualStatsRight')
 };
 let algorithm='bubble',initial=[],frames=[],cursor=0,running=false,timer=null,theme='light',barNodes=[];
+const dual={left:null,right:null,leftFrames:[],rightFrames:[],report:null,progress:0,running:false,timer:null,
+ nodes:{left:[],right:[]}};
 const keys=Object.keys(catalog);
 const random=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const htmlEscape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -193,7 +322,7 @@ function rebuild(values){
  ui.sizeRange.value=String(Math.max(2,Math.min(48,values.length)));
  ui.sizeOutput.textContent=values.length;
  ui.timeline.max=String(Math.max(1,frames.length-1));ui.timeline.value='0';
- barNodes=[];ui.bars.replaceChildren();ui.comparison.replaceChildren();render();
+ barNodes=[];ui.bars.replaceChildren();invalidateDual();ui.comparison.replaceChildren();render();
 }
 function speed(){return Math.round(860/Math.pow(1.9,Number(ui.speedRange.value)-1))}
 function animate(){if(!running)return;if(cursor>=frames.length-1){stop();render();return}const prev=cursor;cursor++;render(prev);if(running)timer=setTimeout(animate,speed())}
@@ -446,13 +575,127 @@ function switchTab(name){
  });
  const panels={explain:'panelExplain',pseudocode:'panelCode',profile:'panelProfile',compare:'panelCompare'};
  Object.entries(panels).forEach(([key,id])=>$(id).hidden=key!==name);
+ if(name==='compare'&&!dual.report&&initial.length>=2)compareAlgorithms();
+ else if(name!=='compare'&&dual.running)pauseDual();
 }
+function invalidateDual(){
+ stopDual();dual.left=null;dual.right=null;dual.report=null;dual.leftFrames=[];dual.rightFrames=[];
+ dual.progress=0;dual.nodes={left:[],right:[]};
+ ui.dualWorkspace.hidden=true;ui.dualProgressText.textContent='0.0%';
+ ui.dualTimeline.value='0';ui.dualExportStatus.textContent='';
+}
+function stopDual(){dual.running=false;if(dual.timer!==null)clearTimeout(dual.timer);dual.timer=null}
 function compareAlgorithms(){
- const key=ui.compareSelect.value;if(!Object.hasOwn(catalog,key))return;
- const a=frames.at(-1),other=generateTrace(initial,key).at(-1);
+ stop();
+ const right=ui.compareSelect.value;
+ if(!Object.hasOwn(catalog,right)||right===algorithm)return;
+ invalidateDual();
+ dual.left=algorithm;dual.right=right;dual.leftFrames=frames;
+ dual.rightFrames=generateTrace(initial,right);
+ dual.report=createExperimentReport(initial,dual.left,dual.right,[dual.leftFrames,dual.rightFrames]);
+ ui.dualNameLeft.textContent=catalog[dual.left].name+' / '+catalog[dual.left].english;
+ ui.dualNameRight.textContent=catalog[dual.right].name+' / '+catalog[dual.right].english;
+ ui.dualWorkspace.hidden=false;
+ ui.dualBarsLeft.replaceChildren();ui.dualBarsRight.replaceChildren();
+ ui.dualStatsLeft.replaceChildren();ui.dualStatsRight.replaceChildren();
+ ui.dualExportStatus.textContent='';
+ renderDual();
  const metrics=[['比较次数','comparisons'],['交换次数','swaps'],['写入次数','writes'],['轮次','pass']];
- const output=metrics.map(([label,prop])=>'<tr><th scope="row">'+label+'</th><td>'+a[prop]+'</td><td>'+other[prop]+'</td></tr>').join('');
- ui.comparison.innerHTML='<table class="compare-table"><thead><tr><th scope="col">教学操作计数</th><th scope="col">'+htmlEscape(catalog[algorithm].name)+'</th><th scope="col">'+htmlEscape(catalog[key].name)+'</th></tr></thead><tbody>'+output+'</tbody></table><p class="compare-note">两种算法使用完全相同的初始数据。表中数据来自各自的完整事件追踪；写入和轮次统计并非跨算法统一的物理成本，也不等于实际执行时间。</p>';
+ const output=metrics.map(([label,prop])=>'<tr><th scope="row">'+label+'</th><td>'+dual.report.results[0].totals[prop]+'</td><td>'+dual.report.results[1].totals[prop]+'</td></tr>').join('');
+ ui.comparison.innerHTML='<table class="compare-table"><thead><tr><th scope="col">全流程事件计数</th><th scope="col">'+htmlEscape(catalog[dual.left].name)+'</th><th scope="col">'+htmlEscape(catalog[dual.right].name)+'</th></tr></thead><tbody>'+output+'</tbody></table><p class="compare-note">相同初始数组：['+initial.join(', ')+']。两侧按照各自总帧数的比例同步推进；单步操作及计数口径不同，不能当作算法运行时间比较。</p>';
+}
+function makeDualBars(side,n){
+ const el=side==='left'?ui.dualBarsLeft:ui.dualBarsRight,frag=document.createDocumentFragment(),nodes=[];
+ for(let i=0;i<n;i++){
+  const track=document.createElement('div');track.className='dual-bar-track';
+  const bar=document.createElement('div');bar.className='dual-bar';
+  const label=document.createElement('span');label.className='dual-bar-label';bar.append(label);
+  track.append(bar);frag.append(track);nodes.push({bar,label});
+ }
+ el.replaceChildren(frag);dual.nodes[side]=nodes;
+}
+function renderDualSide(side){
+ const left=side==='left',framesForSide=left?dual.leftFrames:dual.rightFrames;
+ const frameIndex=Math.round((framesForSide.length-1)*dual.progress/1000);
+ const f=framesForSide[frameIndex];
+ const barsEl=left?ui.dualBarsLeft:ui.dualBarsRight,zeroEl=left?ui.dualZeroLeft:ui.dualZeroRight;
+ const scaleEl=left?ui.dualScaleLeft:ui.dualScaleRight;
+ const frameEl=left?ui.dualFrameLeft:ui.dualFrameRight,activityEl=left?ui.dualActivityLeft:ui.dualActivityRight;
+ const statsEl=left?ui.dualStatsLeft:ui.dualStatsRight;
+ const n=f.values.length;if(dual.nodes[side].length!==n)makeDualBars(side,n);
+ const min=Math.min(0,...initial),max=Math.max(0,...initial),range=Math.max(1,max-min),zero=(0-min)/range*100;
+ zeroEl.style.bottom='calc(18px + (100% - 36px) * '+(zero/100)+')';
+ scaleEl.textContent='['+min+', '+max+']';
+ frameEl.textContent=frameIndex+' / '+(framesForSide.length-1);
+ activityEl.textContent=f.detail;
+ const active=new Set(f.active),sorted=new Set(f.sorted),localSorted=new Set(f.localSorted||[]);
+ for(let i=0;i<n;i++){
+  const v=f.values[i],item=dual.nodes[side][i],bar=item.bar;
+  bar.className='dual-bar'+(v<0?' negative':'');
+  if(f.kind==='complete'||sorted.has(i))bar.classList.add('sorted');
+  else if(active.has(i))bar.classList.add(f.kind==='swap'?'swapping':f.kind==='write'||f.kind==='bucket-write'?'writing':'comparing');
+  else if(localSorted.has(i))bar.classList.add('local-sorted');
+  bar.style.bottom=(v>=0?zero:zero+v/range*100)+'%';
+  bar.style.height=Math.max(.7,Math.abs(v)/range*100)+'%';
+  item.label.textContent=n<=20?String(v):'';
+  bar.title='下标 '+i+'：'+v;
+ }
+ barsEl.setAttribute('aria-label',(left?'算法 A':'算法 B')+'，数组：'+f.values.join('，'));
+ const metrics=[['比较',f.comparisons],['交换',f.swaps],['写入',f.writes],['轮次',f.pass]];
+ // Keep the stats nodes alive; update only their values for smooth playback.
+ if(statsEl.children.length!==metrics.length){
+  statsEl.innerHTML=metrics.map(([label])=>'<div><small>'+label+'</small><strong>0</strong></div>').join('');
+ }
+ metrics.forEach(([,value],i)=>{statsEl.children[i].querySelector('strong').textContent=String(value)});
+}
+function renderDual(){
+ if(!dual.report)return;
+ renderDualSide('left');renderDualSide('right');
+ ui.dualTimeline.value=String(dual.progress);
+ ui.dualProgressText.textContent=(dual.progress/10).toFixed(1)+'%';
+ const finished=dual.progress>=1000;
+ ui.dualPlay.textContent=finished?'↻ 从头播放':dual.running?'● 正在同步播放':dual.progress?'▶ 继续同步播放':'▶ 同步播放';
+ ui.dualPause.disabled=!dual.running;
+ ui.dualBack.disabled=dual.progress===0;
+ ui.dualNext.disabled=finished;
+}
+function advanceDual(){
+ if(!dual.running)return;
+ const speeds=[0,2,3,5,9,15],tick=speeds[Number(ui.dualSpeed.value)]||5;
+ dual.progress=Math.min(1000,dual.progress+tick);
+ if(dual.progress===1000)stopDual();
+ renderDual();
+ if(dual.running)dual.timer=setTimeout(advanceDual,70);
+}
+function playDual(){
+ if(!dual.report)return;
+ if(dual.running)return;
+ if(dual.progress===1000)dual.progress=0;
+ dual.running=true;renderDual();dual.timer=setTimeout(advanceDual,70);
+}
+function pauseDual(){stopDual();renderDual()}
+function seekDual(progress){
+ stopDual();dual.progress=Math.min(1000,Math.max(0,Math.round(progress)||0));renderDual();
+}
+function stepDual(direction){
+ if(!dual.report)return;
+ // One shared tick corresponds to at least one frame on the longer native trace.
+ const total=Math.max(dual.leftFrames.length-1,dual.rightFrames.length-1,1);
+ const quantum=Math.max(1,Math.ceil(1000/total));
+ seekDual(dual.progress+direction*quantum);
+}
+function downloadDual(format){
+ if(!dual.report)return;
+ const stamp=dual.report.generatedAt.replace(/[:.]/g,'-');
+ const filename='sorting-lab-'+dual.left+'-vs-'+dual.right+'-'+stamp+'.'+format;
+ const contents=format==='csv'?experimentReportToCsv(dual.report):JSON.stringify(dual.report,null,2);
+ const type=format==='csv'?'text/csv;charset=utf-8':'application/json;charset=utf-8';
+ const url=URL.createObjectURL(new Blob([contents],{type}));
+ try{
+  const link=document.createElement('a');link.href=url;link.download=filename;
+  document.body.append(link);link.click();link.remove();
+  ui.dualExportStatus.textContent='✓ 已请求导出 '+format.toUpperCase()+'：'+filename;
+ }finally{setTimeout(()=>URL.revokeObjectURL(url),2000)}
 }
 ui.options.addEventListener('click',e=>{const b=e.target.closest('[data-algo]');if(b)selectAlgorithm(b.dataset.algo)});
 ui.play.addEventListener('click',play);ui.pause.addEventListener('click',pause);
@@ -468,13 +711,23 @@ ui.custom.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();
 ui.theme.addEventListener('click',()=>applyTheme(theme==='light'?'dark':'light'));
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>switchTab(b.dataset.tab)));
 ui.compare.addEventListener('click',compareAlgorithms);
+ui.dualPlay.addEventListener('click',playDual);
+ui.dualPause.addEventListener('click',pauseDual);
+ui.dualBack.addEventListener('click',()=>stepDual(-1));
+ui.dualNext.addEventListener('click',()=>stepDual(1));
+ui.dualReset.addEventListener('click',()=>seekDual(0));
+ui.dualTimeline.addEventListener('input',()=>seekDual(Number(ui.dualTimeline.value)));
+ui.dualSpeed.addEventListener('input',()=>ui.dualSpeedOutput.textContent=ui.dualSpeed.value+'×');
+ui.dualExportJson.addEventListener('click',()=>downloadDual('json'));
+ui.dualExportCsv.addEventListener('click',()=>downloadDual('csv'));
+ui.compareSelect.addEventListener('change',compareAlgorithms);
 document.addEventListener('keydown',e=>{
  if(e.ctrlKey||e.metaKey||e.altKey||['INPUT','BUTTON','SELECT','TEXTAREA'].includes(document.activeElement?.tagName))return;
  if(e.code==='Space'){e.preventDefault();running?pause():play()}
  else if(e.code==='ArrowRight'){e.preventDefault();step()}
  else if(e.code==='ArrowLeft'){e.preventDefault();back()}
 });
-window.addEventListener('blur',()=>{if(running)pause()});
+window.addEventListener('blur',()=>{if(running)pause();if(dual.running)pauseDual()});
 try{theme=localStorage.getItem('sorting-lab-theme')==='dark'?'dark':'light'}catch{}
 applyTheme(theme);drawAlgorithms();drawDetails();switchTab('explain');rebuild(makeData(22,'random'));
 
@@ -486,7 +739,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 <body><div class="site">
 <header class="header"><a class="logo" href="./index.html" aria-label="Sorting Lab 首页"><span class="logo-icon" aria-hidden="true">▥</span><span>SORTING <b>LAB</b><small>ALGORITHM WORKBENCH / V3</small></span></a><div class="header-right"><span class="tag">10 ALGORITHMS · LOCAL FIRST</span><button class="theme-btn" id="themeBtn" type="button" aria-label="切换深色模式">☾ 深色模式</button></div></header>
 <main>
-<section class="intro"><div><span class="kicker">INTERACTIVE ALGORITHM WORKBENCH</span><h1>看见算法的每一步<span class="dot">.</span></h1><p>选择算法、调整数据、拖动时间轴；深入观察排序背后的数据结构。</p></div><div class="intro-right"><span class="intro-index">10 <small>/ 10</small></span><span>STEP-BY-STEP · OFFLINE READY</span></div></section>
+<section class="intro"><div><span class="kicker">INTERACTIVE ALGORITHM WORKBENCH</span><h1>看见算法的每一步<span class="dot">.</span></h1><p>选择算法、调整数据、拖动时间轴；深入观察排序背后的数据结构，并在 V3.0 中同屏对照两种算法。</p></div><div class="intro-right"><span class="intro-index">10 <small>/ 10</small></span><span>STEP-BY-STEP · OFFLINE READY</span></div></section>
 <section class="algorithm-section" aria-label="算法选择"><div class="section-heading"><h2>选择算法 <span> / 01</span></h2><p>使用相同的初始数组，比较不同排序思路。</p></div><div id="algorithmGrid" class="algorithm-grid" role="group" aria-label="十种排序算法"></div></section>
 <div class="layout">
 <section class="stage panel" aria-labelledby="algorithmTitle">
@@ -509,11 +762,43 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 <button id="shuffleBtn" class="regenerate" type="button">⤨ 生成新的实验数组 ↗</button>
 <div class="custom-input"><label for="customInput">自定义整数数组</label><input id="customInput" placeholder="例如 8, -3, 5, -3, 7" autocomplete="off" spellcheck="false" inputmode="text"><button id="applyBtn" class="btn primary" type="button">✓ 应用自定义数组</button><p id="inputMessage" role="status" aria-live="polite">支持 2–48 个整数、负数及重复值（-999～999）。</p></div></section>
 </aside></div>
-<section class="details panel" aria-label="算法学习和比较"><div class="tabbar" role="tablist" aria-label="学习面板"><button class="tab active" data-tab="explain" id="tabExplain" role="tab" aria-selected="true" aria-controls="panelExplain">算法原理</button><button class="tab" data-tab="pseudocode" id="tabCode" role="tab" aria-selected="false" aria-controls="panelCode">伪代码</button><button class="tab" data-tab="profile" id="tabProfile" role="tab" aria-selected="false" aria-controls="panelProfile">复杂度与特性</button><button class="tab" data-tab="compare" id="tabCompare" role="tab" aria-selected="false" aria-controls="panelCompare">双算法对照</button></div>
+<section class="details panel" aria-label="算法学习和比较"><div class="tabbar" role="tablist" aria-label="学习面板"><button class="tab active" data-tab="explain" id="tabExplain" role="tab" aria-selected="true" aria-controls="panelExplain">算法原理</button><button class="tab" data-tab="pseudocode" id="tabCode" role="tab" aria-selected="false" aria-controls="panelCode">伪代码</button><button class="tab" data-tab="profile" id="tabProfile" role="tab" aria-selected="false" aria-controls="panelProfile">复杂度与特性</button><button class="tab" data-tab="compare" id="tabCompare" role="tab" aria-selected="false" aria-controls="panelCompare">双算法实验室 V3</button></div>
 <div class="tabpanel" id="panelExplain" role="tabpanel" aria-labelledby="tabExplain"><h3>算法原理</h3><p id="algorithmDesc"></p><p class="learning-tip">✦ 提示：切换算法时保留当前实验数组。辅助视图中的结构会随步骤变化。</p></div>
 <div class="tabpanel" id="panelCode" role="tabpanel" aria-labelledby="tabCode" hidden><h3>伪代码与事件同步</h3><div id="pseudocode" class="pseudocode"></div></div>
 <div class="tabpanel" id="panelProfile" role="tabpanel" aria-labelledby="tabProfile" hidden><h3>理论复杂度与稳定性</h3><div class="properties"><div class="property"><span>最佳时间</span><strong id="bestComplexity"></strong></div><div class="property"><span>平均时间</span><strong id="averageComplexity"></strong></div><div class="property"><span>最坏时间</span><strong id="worstComplexity"></strong></div><div class="property"><span>额外空间</span><strong id="spaceComplexity"></strong></div><div class="property"><span>稳定性*</span><strong id="stability"></strong></div></div><p class="fineprint">* 复杂度按经典算法主体估计，不包含教学轨迹快照；非比较排序的稳定性需以实现过程为准。不同算法的写入/比较统计口径不完全相同，不等同于实际运行耗时。</p></div>
-<div class="tabpanel" id="panelCompare" role="tabpanel" aria-labelledby="tabCompare" hidden><h3>同数组双算法对照</h3><p>选取另一个算法，对当前相同的初始数组计算完整轨迹，比较其教学操作计数（不是墙钟运行时间）。</p><div class="compare-row"><label for="compareSelect">对照算法</label><select id="compareSelect"></select><button id="compareBtn" class="btn primary" type="button">生成对照报告</button></div><div id="comparisonResult" role="status" aria-live="polite"></div></div>
+<div class="tabpanel" id="panelCompare" role="tabpanel" aria-labelledby="tabCompare" hidden>
+<div class="dual-heading"><div><span class="kicker">V3.0 / DUAL ALGORITHM WORKBENCH</span><h3>双算法同屏实验室</h3><p>对同一组初始整数同步回放两种真实算法轨迹；每侧保留自己的事件序列和实时操作指标。</p></div><span class="dual-pill">NORMALIZED SYNC</span></div>
+<div class="compare-row"><label for="compareSelect">右侧对照算法</label><select id="compareSelect"></select><button id="compareBtn" class="btn primary" type="button">↻ 创建 / 更新双算法实验</button></div>
+<p class="dual-explain">同步方式：将两种算法各自的完整执行过程映射到共同的 0–100% 进度。相同进度不代表相同帧号、操作数量或运行耗时。修改算法、输入数组后，请点击「创建 / 更新双算法实验」重新生成。</p>
+<div id="dualWorkspace" hidden>
+<div class="dual-grid">
+ <article class="dual-pane" aria-labelledby="dualNameLeft"><div class="dual-pane-title"><span class="dual-side">A / MAIN ALGORITHM</span><h4 id="dualNameLeft">冒泡排序</h4><span id="dualFrameLeft" class="dual-frame">0 / 0</span></div>
+ <div class="dual-chart"><div class="dual-scale">SHARED VALUE SCALE · <span id="dualScaleLeft"></span></div><div class="dual-chart-area"><div class="dual-gridlines" aria-hidden="true"></div><div id="dualBarsLeft" class="dual-bars" role="img" aria-label="左侧算法实时柱状图"></div><div id="dualZeroLeft" class="dual-zero" aria-hidden="true">0</div></div></div>
+ <p id="dualActivityLeft" class="dual-activity" aria-live="off">等待开始</p><div id="dualStatsLeft" class="dual-stats" aria-label="左侧实时指标"></div>
+ </article>
+ <article class="dual-pane" aria-labelledby="dualNameRight"><div class="dual-pane-title"><span class="dual-side">B / COMPARISON ALGORITHM</span><h4 id="dualNameRight">快速排序</h4><span id="dualFrameRight" class="dual-frame">0 / 0</span></div>
+ <div class="dual-chart"><div class="dual-scale">SHARED VALUE SCALE · <span id="dualScaleRight"></span></div><div class="dual-chart-area"><div class="dual-gridlines" aria-hidden="true"></div><div id="dualBarsRight" class="dual-bars" role="img" aria-label="右侧算法实时柱状图"></div><div id="dualZeroRight" class="dual-zero" aria-hidden="true">0</div></div></div>
+ <p id="dualActivityRight" class="dual-activity" aria-live="off">等待开始</p><div id="dualStatsRight" class="dual-stats" aria-label="右侧实时指标"></div>
+ </article>
+</div>
+<div class="dual-transport">
+ <div class="dual-timeline-header"><label for="dualTimeline"><strong>共同实验进度</strong><span>左右两侧按各自轨迹百分比同步</span></label><output id="dualProgressText" for="dualTimeline">0.0%</output></div>
+ <input id="dualTimeline" type="range" min="0" max="1000" value="0" step="1" aria-label="双算法共同执行进度">
+ <div class="dual-control-row" role="group" aria-label="双算法播放控制">
+ <button id="dualPlayBtn" class="btn primary" type="button">▶ 同步播放</button><button id="dualPauseBtn" class="btn" type="button" disabled>Ⅱ 暂停</button>
+ <button id="dualBackBtn" class="btn" type="button" disabled>← 回退一步</button><button id="dualNextBtn" class="btn" type="button">前进一步 →</button>
+ <button id="dualResetBtn" class="btn muted" type="button">↻ 重置</button>
+ <label for="dualSpeed">速度 <output id="dualSpeedOutput">3×</output></label><input id="dualSpeed" type="range" min="1" max="5" value="3" aria-label="双算法播放速度">
+ </div>
+</div>
+<div class="dual-report">
+ <div class="dual-report-header"><div><h4>实验报告 · 全流程指标</h4><p>下方是全部步骤完成后的累计值；左右图表上方的帧号与实时指标随进度变化。</p></div>
+ <div class="dual-export"><button id="dualExportJson" class="btn" type="button">↓ 导出 JSON（完整轨迹）</button><button id="dualExportCsv" class="btn" type="button">↓ 导出 CSV（逐事件）</button></div></div>
+ <div id="comparisonResult" role="status" aria-live="polite"></div>
+ <p id="dualExportStatus" class="dual-export-status" role="status" aria-live="polite"></p>
+</div>
+</div>
+</div>
 </section>
 </main><footer><span>SORTING LAB / TEN SORTING ALGORITHMS</span><span>Vanilla JavaScript · Local-first · MIT License</span></footer>
 </div></body></html>
