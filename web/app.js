@@ -78,12 +78,18 @@ function renderBars(frame,previous){
  const span=Math.max(1,max-min),zero=(0-min)/span*100;
  ui.zero.style.bottom='calc(18px + (100% - 36px) * '+(zero/100)+')';
  ui.scale.textContent=min<0?'SIGNED / ZERO-ALIGNED':'POSITIVE / ZERO-ALIGNED';
- const active=new Set(frame.active||[]),sorted=new Set(frame.sorted||[]),done=frame.kind==='complete';
+ const active=new Set(frame.active||[]),sorted=new Set(frame.sorted||[]),localSorted=new Set(frame.localSorted||[]),done=frame.kind==='complete';
  frame.values.forEach((value,i)=>{
   const obj=barNodes[i],b=obj.bar;
   b.className='bar'+(value<0?' negative':'');
   if(done||sorted.has(i))b.classList.add('sorted');
-  else if(active.has(i))b.classList.add(frame.kind==='swap'?'swapping':frame.kind==='write'?'writing':frame.kind==='bucket'||frame.kind==='count'?'collecting':'comparing');
+  else if(active.has(i))b.classList.add(frame.kind==='swap'?'swapping':frame.kind==='write'||frame.kind==='bucket-write'?'writing':frame.kind==='bucket'||frame.kind==='count'?'collecting':'comparing');
+  else if(localSorted.has(i))b.classList.add('local-sorted');
+  if(algorithm==='quick'&&frame.meta?.type==='quick'){
+    const meta=frame.meta;
+    if(i<meta.lo||i>meta.hi)b.classList.add('range-dim');
+    obj.track.dataset.pointer=i===meta.i&&i===meta.j?'IJ':i===meta.i?'I':i===meta.j?'J':'';
+  }else obj.track.dataset.pointer='';
   b.style.bottom=(value>=0?zero:zero+value/span*100)+'%';
   b.style.height=Math.max(0.8,Math.abs(value)/span*100)+'%';
   obj.label.textContent=n<=24?String(value):'';
