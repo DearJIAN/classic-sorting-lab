@@ -29,3 +29,18 @@ test('visual input validation and metadata',()=>{
  assert.throws(()=>generateTrace(Array(97).fill(2),'heap'),RangeError);
  assert.equal(catalog.merge.stable,true);assert.equal(catalog.quick.stable,false);
 });
+
+test('algorithm-specific inspector metadata and persistent confirmed segments',()=>{
+ const original=[5,2,4,1,3];
+ for(const [key,type] of [['quick','quick'],['merge','merge'],['heap','heap'],['counting','counting'],['radix','radix'],['bucket','bucket']]){
+  const frames=generateTrace(original,key);
+  assert.ok(frames.some(f=>f.meta?.type===type),key+' lacks inspector trace metadata');
+ }
+ const bubble=generateTrace([4,3,2,1],'bubble');
+ const first=bubble.findIndex(f=>f.kind==='pass');
+ assert.ok(first>0);
+ assert.ok(bubble[first].sorted.includes(3));
+ assert.ok(bubble[first+1].sorted.includes(3),'confirmed sorted region must persist after the round');
+ const radix=generateTrace([-93,-4,12,3,0],'radix');
+ assert.ok(radix.some(f=>f.kind==='bucket'&&f.meta?.type==='radix'));
+});

@@ -11,3 +11,12 @@ test('every ui.* property exists in the controller handle map',async()=>{
  const used=[...app.matchAll(/\bui\.([A-Za-z_$][\w$]*)/g)].map(m=>m[1]);
  for(const name of used)assert.ok(names.has(name),'Undefined UI binding: ui.'+name);
 });
+
+test('timeline, inspector, comparison and signed axis are present in both builds',async()=>{
+ const html=await read('web/index.html'),app=await read('web/app.js'),css=await read('web/styles.css');
+ for(const id of ['timelineRange','zeroLine','inspectorVisual','compareSelect','compareBtn','panelCompare'])assert.match(html,new RegExp('id="'+id+'"'));
+ assert.match(app,/function renderInspector/);
+ assert.match(app,/function compareAlgorithms/);
+ assert.match(app,/function renderBars/);
+ assert.match(css,/--on-primary:#132e28/);
+});
