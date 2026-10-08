@@ -6,7 +6,7 @@
 <body><div class="site">
 <header class="header"><a class="logo" href="./index.html" aria-label="Sorting Lab 首页"><span class="logo-icon" aria-hidden="true">▥</span><span>SORTING <b>LAB</b><small>ALGORITHM WORKBENCH / V3</small></span></a><div class="header-right"><span class="tag">10 ALGORITHMS · LOCAL FIRST</span><button class="theme-btn" id="themeBtn" type="button" aria-label="切换深色模式">☾ 深色模式</button></div></header>
 <main>
-<section class="intro"><div><span class="kicker">INTERACTIVE ALGORITHM WORKBENCH</span><h1>看见算法的每一步<span class="dot">.</span></h1><p>选择算法、调整数据、拖动时间轴；深入观察排序背后的数据结构。</p></div><div class="intro-right"><span class="intro-index">10 <small>/ 10</small></span><span>STEP-BY-STEP · OFFLINE READY</span></div></section>
+<section class="intro"><div><span class="kicker">INTERACTIVE ALGORITHM WORKBENCH</span><h1>看见算法的每一步<span class="dot">.</span></h1><p>选择算法、调整数据、拖动时间轴；深入观察排序背后的数据结构，并在 V3.0 中同屏对照两种算法。</p></div><div class="intro-right"><span class="intro-index">10 <small>/ 10</small></span><span>STEP-BY-STEP · OFFLINE READY</span></div></section>
 <section class="algorithm-section" aria-label="算法选择"><div class="section-heading"><h2>选择算法 <span> / 01</span></h2><p>使用相同的初始数组，比较不同排序思路。</p></div><div id="algorithmGrid" class="algorithm-grid" role="group" aria-label="十种排序算法"></div></section>
 <div class="layout">
 <section class="stage panel" aria-labelledby="algorithmTitle">
@@ -29,11 +29,43 @@
 <button id="shuffleBtn" class="regenerate" type="button">⤨ 生成新的实验数组 ↗</button>
 <div class="custom-input"><label for="customInput">自定义整数数组</label><input id="customInput" placeholder="例如 8, -3, 5, -3, 7" autocomplete="off" spellcheck="false" inputmode="text"><button id="applyBtn" class="btn primary" type="button">✓ 应用自定义数组</button><p id="inputMessage" role="status" aria-live="polite">支持 2–48 个整数、负数及重复值（-999～999）。</p></div></section>
 </aside></div>
-<section class="details panel" aria-label="算法学习和比较"><div class="tabbar" role="tablist" aria-label="学习面板"><button class="tab active" data-tab="explain" id="tabExplain" role="tab" aria-selected="true" aria-controls="panelExplain">算法原理</button><button class="tab" data-tab="pseudocode" id="tabCode" role="tab" aria-selected="false" aria-controls="panelCode">伪代码</button><button class="tab" data-tab="profile" id="tabProfile" role="tab" aria-selected="false" aria-controls="panelProfile">复杂度与特性</button><button class="tab" data-tab="compare" id="tabCompare" role="tab" aria-selected="false" aria-controls="panelCompare">双算法对照</button></div>
+<section class="details panel" aria-label="算法学习和比较"><div class="tabbar" role="tablist" aria-label="学习面板"><button class="tab active" data-tab="explain" id="tabExplain" role="tab" aria-selected="true" aria-controls="panelExplain">算法原理</button><button class="tab" data-tab="pseudocode" id="tabCode" role="tab" aria-selected="false" aria-controls="panelCode">伪代码</button><button class="tab" data-tab="profile" id="tabProfile" role="tab" aria-selected="false" aria-controls="panelProfile">复杂度与特性</button><button class="tab" data-tab="compare" id="tabCompare" role="tab" aria-selected="false" aria-controls="panelCompare">双算法实验室 V3</button></div>
 <div class="tabpanel" id="panelExplain" role="tabpanel" aria-labelledby="tabExplain"><h3>算法原理</h3><p id="algorithmDesc"></p><p class="learning-tip">✦ 提示：切换算法时保留当前实验数组。辅助视图中的结构会随步骤变化。</p></div>
 <div class="tabpanel" id="panelCode" role="tabpanel" aria-labelledby="tabCode" hidden><h3>伪代码与事件同步</h3><div id="pseudocode" class="pseudocode"></div></div>
 <div class="tabpanel" id="panelProfile" role="tabpanel" aria-labelledby="tabProfile" hidden><h3>理论复杂度与稳定性</h3><div class="properties"><div class="property"><span>最佳时间</span><strong id="bestComplexity"></strong></div><div class="property"><span>平均时间</span><strong id="averageComplexity"></strong></div><div class="property"><span>最坏时间</span><strong id="worstComplexity"></strong></div><div class="property"><span>额外空间</span><strong id="spaceComplexity"></strong></div><div class="property"><span>稳定性*</span><strong id="stability"></strong></div></div><p class="fineprint">* 复杂度按经典算法主体估计，不包含教学轨迹快照；非比较排序的稳定性需以实现过程为准。不同算法的写入/比较统计口径不完全相同，不等同于实际运行耗时。</p></div>
-<div class="tabpanel" id="panelCompare" role="tabpanel" aria-labelledby="tabCompare" hidden><h3>同数组双算法对照</h3><p>选取另一个算法，对当前相同的初始数组计算完整轨迹，比较其教学操作计数（不是墙钟运行时间）。</p><div class="compare-row"><label for="compareSelect">对照算法</label><select id="compareSelect"></select><button id="compareBtn" class="btn primary" type="button">生成对照报告</button></div><div id="comparisonResult" role="status" aria-live="polite"></div></div>
+<div class="tabpanel" id="panelCompare" role="tabpanel" aria-labelledby="tabCompare" hidden>
+<div class="dual-heading"><div><span class="kicker">V3.0 / DUAL ALGORITHM WORKBENCH</span><h3>双算法同屏实验室</h3><p>对同一组初始整数同步回放两种真实算法轨迹；每侧保留自己的事件序列和实时操作指标。</p></div><span class="dual-pill">NORMALIZED SYNC</span></div>
+<div class="compare-row"><label for="compareSelect">右侧对照算法</label><select id="compareSelect"></select><button id="compareBtn" class="btn primary" type="button">↻ 创建 / 更新双算法实验</button></div>
+<p class="dual-explain">同步方式：将两种算法各自的完整执行过程映射到共同的 0–100% 进度。相同进度不代表相同帧号、操作数量或运行耗时。修改算法、输入数组后将重新生成实验。</p>
+<div id="dualWorkspace" hidden>
+<div class="dual-grid">
+ <article class="dual-pane" aria-labelledby="dualNameLeft"><div class="dual-pane-title"><span class="dual-side">A / MAIN ALGORITHM</span><h4 id="dualNameLeft">冒泡排序</h4><span id="dualFrameLeft" class="dual-frame">0 / 0</span></div>
+ <div class="dual-chart"><div class="dual-scale">SHARED VALUE SCALE · <span id="dualScaleLeft"></span></div><div class="dual-chart-area"><div class="dual-gridlines" aria-hidden="true"></div><div id="dualBarsLeft" class="dual-bars" role="img" aria-label="左侧算法实时柱状图"></div><div id="dualZeroLeft" class="dual-zero" aria-hidden="true">0</div></div></div>
+ <p id="dualActivityLeft" class="dual-activity" aria-live="off">等待开始</p><div id="dualStatsLeft" class="dual-stats" aria-label="左侧实时指标"></div>
+ </article>
+ <article class="dual-pane" aria-labelledby="dualNameRight"><div class="dual-pane-title"><span class="dual-side">B / COMPARISON ALGORITHM</span><h4 id="dualNameRight">快速排序</h4><span id="dualFrameRight" class="dual-frame">0 / 0</span></div>
+ <div class="dual-chart"><div class="dual-scale">SHARED VALUE SCALE · <span id="dualScaleRight"></span></div><div class="dual-chart-area"><div class="dual-gridlines" aria-hidden="true"></div><div id="dualBarsRight" class="dual-bars" role="img" aria-label="右侧算法实时柱状图"></div><div id="dualZeroRight" class="dual-zero" aria-hidden="true">0</div></div></div>
+ <p id="dualActivityRight" class="dual-activity" aria-live="off">等待开始</p><div id="dualStatsRight" class="dual-stats" aria-label="右侧实时指标"></div>
+ </article>
+</div>
+<div class="dual-transport">
+ <div class="dual-timeline-header"><label for="dualTimeline"><strong>共同实验进度</strong><span>左右两侧按各自轨迹百分比同步</span></label><output id="dualProgressText" for="dualTimeline">0.0%</output></div>
+ <input id="dualTimeline" type="range" min="0" max="1000" value="0" step="1" aria-label="双算法共同执行进度">
+ <div class="dual-control-row" role="group" aria-label="双算法播放控制">
+ <button id="dualPlayBtn" class="btn primary" type="button">▶ 同步播放</button><button id="dualPauseBtn" class="btn" type="button" disabled>Ⅱ 暂停</button>
+ <button id="dualBackBtn" class="btn" type="button" disabled>← 回退一步</button><button id="dualNextBtn" class="btn" type="button">前进一步 →</button>
+ <button id="dualResetBtn" class="btn muted" type="button">↻ 重置</button>
+ <label for="dualSpeed">速度 <output id="dualSpeedOutput">3×</output></label><input id="dualSpeed" type="range" min="1" max="5" value="3" aria-label="双算法播放速度">
+ </div>
+</div>
+<div class="dual-report">
+ <div class="dual-report-header"><div><h4>实验报告 · 全流程指标</h4><p>下方是全部步骤完成后的累计值；左右图表上方的帧号与实时指标随进度变化。</p></div>
+ <div class="dual-export"><button id="dualExportJson" class="btn" type="button">↓ 导出 JSON（完整轨迹）</button><button id="dualExportCsv" class="btn" type="button">↓ 导出 CSV（逐事件）</button></div></div>
+ <div id="comparisonResult" role="status" aria-live="polite"></div>
+ <p id="dualExportStatus" class="dual-export-status" role="status" aria-live="polite"></p>
+</div>
+</div>
+</div>
 </section>
 </main><footer><span>SORTING LAB / TEN SORTING ALGORITHMS</span><span>Vanilla JavaScript · Local-first · MIT License</span></footer>
 </div></body></html>
