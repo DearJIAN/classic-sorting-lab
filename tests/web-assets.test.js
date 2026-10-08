@@ -20,3 +20,10 @@ test('timeline, inspector, comparison and signed axis are present in both builds
  assert.match(app,/function renderBars/);
  assert.match(css,/--on-primary:#132e28/);
 });
+
+test('v2.2: real connected heap SVG and algorithm-specific animations are wired',async()=>{
+ const app=await read('web/app.js'),css=await read('web/styles.css'),engine=await read('src/trace-engine.js');
+ for(const token of ['function renderHeapTree','heap-edge','heapCoordinates','counting-list','quick-lane','radix-buckets','range-buckets','renderInspector(f,previous)','localSorted'])assert.ok(app.includes(token),'Missing UI behavior '+token);
+ assert.match(css,/\.heap-edge/);assert.match(css,/\.heap-value/);assert.match(css,/\.bar\.local-sorted/);
+ assert.match(engine,/bucket-write/);assert.match(engine,/sparse-fallback/);
+});

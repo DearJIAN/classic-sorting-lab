@@ -54,6 +54,34 @@ with sync_playwright() as p:
   page.set_viewport_size({'width':390,'height':844})
   assert page.locator('#timelineRange').is_visible()
   assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 2')
+  # V2.2: connected heap graph, persistent node identity and indexed labels.
+  page.set_viewport_size({'width':1360,'height':900})
+  page.locator('[data-algo="heap"]').click()
+  assert page.locator('.heap-tree').count()==1
+  assert page.locator('.heap-node').count()==5
+  assert page.locator('.heap-edge').count()==4
+  page.locator('#timelineRange').fill('7')
+  assert page.locator('.heap-node').count()==5
+  assert page.locator('.heap-value').count()==5
+  page.locator('[data-algo="merge"]').click()
+  page.locator('#timelineRange').fill('7')
+  assert 'LEFT BUFFER' in page.locator('#inspectorVisual').inner_text()
+  assert 'RIGHT BUFFER' in page.locator('#inspectorVisual').inner_text()
+  page.locator('[data-algo="counting"]').click()
+  page.locator('#timelineRange').fill('2')
+  assert page.locator('.counting-item').count()>=1
+  assert page.locator('.counting-track').count()>=1
+  page.locator('[data-algo="radix"]').click()
+  page.locator('#timelineRange').fill('7')
+  assert page.locator('.radix-buckets .bucket-item').count()==10
+  assert page.locator('.radix-buckets .bucket-selected').count()==1
+  page.locator('[data-algo="bucket"]').click()
+  page.locator('#timelineRange').fill('5')
+  assert page.locator('.range-buckets .bucket-item').count()>=2
+  page.locator('[data-algo="quick"]').click()
+  page.locator('#timelineRange').fill('1')
+  assert page.locator('.quick-lane .quick-item').count()==5
+  assert page.locator('.bar-track[data-pointer="I"],.bar-track[data-pointer="IJ"]').count()>=1
   assert not errors,errors
   print('PASS',mode,'10 algorithms, custom input, navigation, theme, play/pause, random arrays')
   page.close()
