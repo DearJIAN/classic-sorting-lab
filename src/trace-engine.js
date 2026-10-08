@@ -82,3 +82,61 @@ export function generateTrace(input,algorithm='bubble'){
  if(!frames.length||frames[frames.length-1].kind!=='complete'){snap('complete',[],'排序完成！',Array.from({length:n},(_,i)=>i))}
  return frames;
 }
+
+
+/**
+ * Reproducible, serializable dual-algorithm experiment.
+ * The comparison is between educational event traces, not elapsed CPU time.
+ * Progress on the two canvases is aligned by 0..100% of each trace's length,
+ * never by pretending that heterogeneous operations take equal wall time.
+ */
+export function createExperimentReport(input,leftKey,rightKey,providedFrames){
+ if(!Array.isArray(input)||!input.every(Number.isSafeInteger))throw new TypeError('Expected integer input');
+ if(input.length<2||input.length>48)throw new RangeError('Experiment input length must be 2..48');
+ if(!Object.hasOwn(catalog,leftKey)||!Object.hasOwn(catalog,rightKey))throw new RangeError('Unknown comparison algorithm');
+ if(leftKey===rightKey)throw new RangeError('Select two different algorithms');
+ const algorithms=[leftKey,rightKey];
+ return {
+  schemaVersion:'sorting-lab-v3.0',
+  generatedAt:new Date().toISOString(),
+  synchronization:'normalized-progress',
+  disclaimer:'教学事件统计；比较/交换/写入和轮次口径因算法而异，并非运行耗时或性能基准。',
+  input:input.slice(),
+  results:algorithms.map((key,i)=>{
+   const frames=(providedFrames&&providedFrames[i])||generateTrace(input,key);
+   if(!Array.isArray(frames)||!frames.length||frames[0].values.join(',')!==input.join(','))
+    throw new TypeError('Experiment frames do not match the initial input');
+   const last=frames.at(-1);
+   if(last.kind!=='complete')throw new TypeError('Experiment trace is incomplete');
+   return {
+    algorithm:key,name:catalog[key].name,frameCount:frames.length,
+    totals:{comparisons:last.comparisons,swaps:last.swaps,writes:last.writes,pass:last.pass},
+    finalValues:last.values.slice(),
+    frames:frames.map((f,index)=>({
+     step:index,progress:Number((index/Math.max(1,frames.length-1)).toFixed(6)),
+     kind:f.kind,detail:f.detail,values:f.values.slice(),
+     active:f.active.slice(),sorted:f.sorted.slice(),localSorted:(f.localSorted||[]).slice(),
+     comparisons:f.comparisons,swaps:f.swaps,writes:f.writes,pass:f.pass,
+     meta:f.meta
+    }))
+   };
+  })
+ };
+}
+/** One CSV row per actual event, ordered by algorithm then native trace index. */
+export function experimentReportToCsv(report){
+ const escape=v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"';
+ const columns=['algorithm','name','step','progress','kind','detail','values','active','sorted','comparisons','swaps','writes','pass'];
+ const lines=[columns.join(',')];
+ for(const result of report.results){
+  for(const f of result.frames){
+   const values=[
+    result.algorithm,result.name,f.step,f.progress,f.kind,f.detail,
+    JSON.stringify(f.values),JSON.stringify(f.active),JSON.stringify(f.sorted),
+    f.comparisons,f.swaps,f.writes,f.pass
+   ];
+   lines.push(values.map(escape).join(','));
+  }
+ }
+ return '\uFEFF'+lines.join('\r\n')+'\r\n';
+}
