@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b121d">
+  <meta name="description" content="可交互的冒泡排序算法实验室：单步演示、速度控制、自定义数组和算法分析。">
+  <title>Sorting Lab — 让排序看得见</title>
+  <style>
+:root{color-scheme:dark;--bg:#0a111b;--panel:#101c2a;--panel2:#142233;--border:#273545;--sub:#8495ab;--light:#ecf4fb;--mint:#9bffcc;--green:#71e3b2;--orange:#ffc083;--mono:ui-monospace,SFMono-Regular,Consolas,Liberation Mono,monospace;--sans:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;background:var(--bg);color:var(--light);font-family:var(--sans);-webkit-font-smoothing:antialiased}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.43}a{color:inherit;text-decoration:none}button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--mint);outline-offset:4px}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(#fff 1px,transparent 1px),linear-gradient(90deg,#fff 1px,transparent 1px);background-size:72px 72px;opacity:.017;z-index:-1}.ambient{position:fixed;filter:blur(95px);opacity:.23;pointer-events:none;z-index:-2;border-radius:50%}.ambient-left{width:520px;height:500px;background:#114c54;left:-220px;top:60px}.ambient-right{width:450px;height:400px;background:#24486a;right:-240px;top:440px}.page-wrap{max-width:1320px;margin:0 auto;padding:0 45px}
+.site-header{height:105px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #243444;gap:20px}.brand{display:flex;align-items:center;gap:12px}.brand-mark{width:42px;height:42px;border:1px solid #9bffcc;border-radius:11px;background:#98ffc9;display:grid;place-items:center;box-shadow:0 0 38px #81fbd238}.mark-bars{display:flex;align-items:flex-end;gap:4px;height:22px;transform:skew(-9deg)}.mark-bars i{display:block;width:6px;border-radius:2px 2px 0 0;background:#153525;height:12px}.mark-bars i:nth-child(2){height:21px}.mark-bars i:nth-child(3){height:16px}.brand-text{font-size:17px;font-weight:850;letter-spacing:.1em;line-height:1}.brand-text>span{color:var(--mint)}.brand-text small{display:block;margin-top:7px;font-family:var(--mono);font-size:8px;letter-spacing:.17em;color:#7d8da1;font-weight:500}.nav-pill{border:1px solid #2e453f;padding:10px 18px;border-radius:30px;background:#0e211f;color:#c6f7df;font:10px var(--mono);letter-spacing:.14em}.online-indicator{display:inline-block;width:6px;height:6px;background:#8dffd0;border-radius:100%;box-shadow:0 0 9px #8dffd0;margin-right:7px}.header-link{font:10px var(--mono);letter-spacing:.13em;color:#9aaabd;transition:color .2s}.header-link:hover{color:var(--mint)}.header-link span{color:var(--mint);font-size:16px}
+main{padding-top:51px}.eyebrow,.section-kicker,.side-heading small,.metric small,.plot-header,.progress-caption,.activity-label,.card-top-tag,.range-ends,.keyboard-tip,.catalogue .chips,footer{font-family:var(--mono)}.eyebrow{color:var(--mint);font-size:10px;letter-spacing:.23em;font-weight:600;display:flex;align-items:center;gap:12px}.eyebrow-line{width:22px;height:1px;background:var(--mint)}.eyebrow-divider{color:#53677e}.hero-row{display:flex;align-items:center;justify-content:space-between;margin-top:12px;margin-bottom:45px;gap:24px}h1{font-size:clamp(43px,4.8vw,69px);letter-spacing:-.058em;line-height:1.18;margin:0;font-weight:820}h1>span:first-child{color:var(--mint)}.hero-dot{color:#a8ffbd}.lead{font-size:14px;line-height:1.9;color:#879ab0;margin:20px 0 0;max-width:565px}.lead span{color:#d2f5e5}.hero-index{border:1px solid #283948;background:#0b1824aa;border-radius:17px;min-width:134px;height:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(3deg)}.hero-index>span{font-size:76px;color:#8ff0c2;line-height:.9;font-family:var(--mono);font-weight:800;letter-spacing:-.09em}.hero-index small{font:9px var(--mono);letter-spacing:.16em;color:#7597a5;margin-top:15px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 335px;align-items:stretch;gap:16px}.visual-panel,.side-panel,.knowledge-card,.catalogue{border:1px solid var(--border);background:linear-gradient(135deg,#142232f4,#101b2b);border-radius:16px}.visual-panel{padding:26px;min-width:0}.side-panel{padding:0;background:linear-gradient(150deg,#121f2f,#111c2a)}.panel-header,.panel-heading,.plot-header,.progress-caption,.transport,.field-head,.side-heading,.card-top{display:flex;align-items:center;justify-content:space-between}.panel-heading{justify-content:flex-start;gap:12px}.square-icon{width:38px;height:38px;display:grid;place-items:center;background:#1c433e;border:1px solid #386d60;color:#b8ffe0;border-radius:9px;font-size:22px}.section-kicker{font-size:9px;letter-spacing:.19em;color:#8ff0c3;font-weight:650}.panel-heading h2{margin:4px 0 0;font-size:18px;letter-spacing:-.02em}.panel-heading h2 span{font:10px var(--mono);font-weight:400;color:#7e91a7;margin-left:6px;letter-spacing:.04em}.status-badge{display:flex;align-items:center;gap:8px;border:1px solid #2d4c48;border-radius:25px;padding:8px 13px;background:#142e2c;color:#a9edcc;font-size:11px;white-space:nowrap}.status-badge>span:first-child{width:7px;height:7px;border-radius:100%;background:#80f5be}.status-badge.running>span:first-child{animation:pulse 1.1s infinite}.status-badge.complete{border-color:#50735a;background:#1a3c35}.status-badge.paused{border-color:#645038;background:#352920;color:#eac38e}.status-badge.paused>span:first-child{background:var(--orange)}@keyframes pulse{50%{opacity:.35}}
+.plot{margin-top:26px;border:1px solid #293849;background:#0d1826;border-radius:12px;overflow:hidden;position:relative}.plot-header{padding:17px 21px;color:#71879f;font-size:10px;letter-spacing:.13em;border-bottom:1px solid #223243}.plot-header>span:first-child{display:flex;align-items:center;gap:9px}.tiny-square{height:7px;width:7px;background:var(--mint);border-radius:2px}.plot-area{height:338px;position:relative;margin:0 19px}.plot-lines{position:absolute;inset:15px 0 23px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}.plot-lines i{border-top:1px dashed #294052;height:1px}.bars{position:absolute;inset:25px 6px 22px;display:flex;gap:clamp(2px,.5vw,6px);align-items:flex-end;justify-content:center}.bar{flex:1;min-width:0;max-width:46px;border-radius:4px 4px 0 0;background:linear-gradient(0deg,#245e78,#5cbdba);border-top:1px solid #90e6db;position:relative;transition:height .22s ease,background .18s ease,transform .2s ease;box-shadow:inset 1px 0 #ffffff13}.bar-value{position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);font:10px var(--mono);color:#8094a5;white-space:nowrap}.bar.comparing{background:linear-gradient(0deg,#d87843,#ffc789);border-color:#ffe2b1;z-index:3;box-shadow:0 0 17px #f4ad654b;transform:translateY(-4px)}.bar.comparing .bar-value{color:#ffdcac;font-weight:700}.bar.sorted{background:linear-gradient(0deg,#276e52,#8df0ae);border-color:#bcffd1}.bar.sorted .bar-value{color:#a6e9bf}.bar.swapped{background:linear-gradient(0deg,#b17c50,#ffcd9e)}.axis-bottom{position:absolute;bottom:22px;left:0;right:0;border-bottom:1px solid #4a6075}.legend{display:flex;justify-content:center;gap:28px;border-top:1px solid #273748;padding:14px 10px;color:#91a2b5;font-size:11px;flex-wrap:wrap}.legend>span{display:flex;align-items:center;gap:8px}.legend-block{width:10px;height:10px;display:inline-block;border-radius:2px}.legend-block.default{background:#67bfc0}.legend-block.active{background:var(--orange)}.legend-block.sorted{background:#8cecae}
+.progress-area{margin-top:26px}.progress-caption{color:#8e9fb1;letter-spacing:.13em;font-size:10px}.progress-caption strong{color:#aaffcf;font-size:12px}.progress-track{height:6px;border-radius:20px;background:#243649;overflow:hidden;margin-top:12px}.progress-track>div{height:100%;width:0;background:linear-gradient(90deg,#55b8a9,#b5ffca);border-radius:20px;transition:width .22s ease}.transport{gap:9px;margin-top:25px;flex-wrap:wrap;justify-content:flex-start}.control{height:43px;padding:0 15px;border:1px solid #354557;border-radius:9px;background:#1a2a3d;color:#e2ecf8;font-size:12px;font-weight:650;display:inline-flex;align-items:center;justify-content:center;gap:10px;transition:background .2s,border-color .2s,transform .2s}.control:hover:not(:disabled){background:#253b52;border-color:#56758a;transform:translateY(-1px)}.control.primary{background:#a2f6c5;color:#103b2b;border-color:#baffd7;min-width:122px}.control.primary:hover:not(:disabled){background:#c0ffdc}.control.muted{color:#a0aec0}.play-icon{font-size:10px}.pause-icon{font-size:17px}.forward-icon{font-size:20px}.reset-icon{font-size:19px}.keyboard-tip{color:#647b92;font-size:9px;margin-left:auto;white-space:nowrap}.keyboard-tip span{display:block;margin-top:4px;color:#445f74;font-family:var(--sans)}.activity-box{background:#142838;border:1px solid #284755;border-radius:9px;display:flex;gap:14px;padding:15px 16px;margin-top:25px;align-items:center}.activity-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:6px;color:#a2ffcb;background:#245046;font-size:21px;flex-shrink:0}.activity-label{color:#77c4aa;letter-spacing:.1em;font-size:9px}.activity-box p{margin:6px 0 0;font-size:12px;color:#a3b8c9;line-height:1.5;min-height:18px}
+.metrics-panel{padding:26px 23px 24px;border-bottom:1px solid #2a3a48}.side-heading{font-size:14px;font-weight:720;justify-content:flex-start;gap:10px}.side-heading>span{font:10px var(--mono);color:#0c322c;background:#9ff8cf;padding:5px 6px;border-radius:5px}.side-heading small{font-size:9px;letter-spacing:.08em;font-weight:400;margin-left:auto;color:#7d91a6}.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:23px}.metric{border:1px solid #2c4052;background:#17283a;border-radius:10px;padding:17px 15px 16px;min-width:0}.metric>span{font-size:11px;color:#b7c7d7}.metric small{display:block;font-size:8px;letter-spacing:.07em;color:#637e98;margin-top:5px}.metric strong{display:block;font:26px var(--mono);letter-spacing:-.06em;color:#e8f7ff;margin-top:15px}.metric:nth-child(2) strong{color:var(--mint)}.settings-panel{padding:23px}.field-head{margin-top:25px;color:#c3d2dc;font-size:12px}.field-head output{font:12px var(--mono);color:var(--mint)}input[type=range]{width:100%;appearance:none;height:5px;border-radius:20px;background:linear-gradient(90deg,#69ceaa,#2b4953);outline:none;margin:16px 0 5px;accent-color:var(--mint)}input[type=range]::-webkit-slider-thumb{appearance:none;background:#b8ffdb;border:3px solid #1a4239;width:17px;height:17px;border-radius:100%;box-shadow:0 0 0 1px #89eec4;cursor:pointer}input[type=range]::-moz-range-thumb{background:#b8ffdb;border:3px solid #1a4239;width:14px;height:14px;border-radius:100%;cursor:pointer}.range-ends{display:flex;justify-content:space-between;color:#667d93;font-size:9px;letter-spacing:.05em}.speed-head,.distribution-head{margin-top:26px}.select-wrap{margin-top:11px}select{background:#1b2d40;border:1px solid #354b60;border-radius:8px;color:#dceaf3;width:100%;height:39px;padding:0 12px;font-size:12px;outline:none}.shuffle-btn{background:#1c443c;border:1px solid #366a57;color:#b5ffdc;border-radius:8px;width:100%;height:40px;text-align:left;padding:0 14px;margin-top:17px;font-size:12px;font-weight:650;display:flex;justify-content:space-between;align-items:center}.shuffle-btn:hover{background:#285a4a}.shuffle-btn span{font-size:17px}.custom-data{border-top:1px solid #2b3d4f;margin-top:22px;padding-top:19px}.custom-data label{font-size:12px;color:#c5d3e0}.custom-row{display:flex;margin-top:11px;gap:7px}.custom-row input{background:#0d1b29;border:1px solid #334b60;border-radius:7px;min-width:0;width:100%;padding:0 11px;color:#f1faff;font:11px var(--mono)}.custom-row button{padding:0 13px;border-radius:7px;border:1px solid #4e7664;background:#22483a;color:#bdfbd5;font-size:11px}.input-message{color:#6e8296;font-size:10px;line-height:1.6;min-height:31px;margin:9px 0 0}.input-message.error{color:#ffac9e}
+.knowledge-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:18px}.knowledge-card{padding:25px}.card-top{align-items:center}.card-top h2{margin:6px 0 0;font-size:17px}.card-top-tag{font-size:9px;letter-spacing:.08em;color:#819ab0;border:1px solid #34485a;background:#1c3040;border-radius:5px;padding:7px 9px}.code-window{border:1px solid #2b3e4d;background:#0c1825;border-radius:10px;margin-top:20px;overflow:hidden;padding:16px 0}.code-dots{display:flex;gap:6px;margin:0 0 13px 18px}.code-dots i{width:7px;height:7px;background:#456374;border-radius:100%}.code-dots i:first-child{background:#f09e8d}.code-dots i:nth-child(2){background:#fac981}.code-dots i:nth-child(3){background:#8cefb5}.code-line{display:flex;gap:22px;padding:4px 19px;border-left:2px solid transparent;min-height:25px;white-space:pre;overflow-x:auto;transition:background .2s}.code-line>span{font:11px var(--mono);color:#61778b}.code-line code{font:11px var(--mono);color:#a5bdcf}.code-line code b{font-weight:600;color:#b8a4ff}.code-line code em{font-style:normal;color:#f1bd84}.code-line.active{background:#1a3e3b;border-left-color:#a9ffd0}.code-line.active code{color:#eafff2}.code-note{color:#94a7b9;font-size:12px;line-height:1.8;margin:17px 0 0}.complexity-list{margin-top:22px}.complexity-list>div{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #293b4d;padding:13px 0;color:#9cafc1;font-size:12px}.complexity-list>div strong{font:12px var(--mono);color:#eff7fd}.complexity-list>div strong.good{color:var(--mint)}.tip{display:flex;gap:11px;border:1px solid #38554c;background:#183329;border-radius:9px;margin-top:22px;padding:13px}.tip>span{color:#b6fbcf;font-size:20px}.tip p{font-size:11px;line-height:1.7;color:#a7cbb8;margin:0}.tip strong{color:#d7ffe2}.catalogue{margin-top:18px;display:flex;justify-content:space-between;align-items:center;padding:28px;gap:28px}.catalogue h2{font-size:21px;margin:8px 0}.catalogue p{margin:0;color:#7f95ab;font-size:12px;line-height:1.7}.chips{display:grid;grid-template-columns:repeat(5,auto);gap:7px}.chips span{border:1px solid #345249;border-radius:6px;color:#c3e7d4;background:#1b3732;font-size:10px;white-space:nowrap;padding:8px 10px}footer{border-top:1px solid #283848;display:flex;justify-content:space-between;padding:25px 0 35px;margin-top:30px;color:#668099;font-size:10px;letter-spacing:.1em}footer b{color:var(--mint)}
+@media(max-width:1040px){.page-wrap{padding:0 26px}.workspace{grid-template-columns:minmax(0,1fr) 290px}.side-panel .metrics-panel,.settings-panel{padding:20px}.metric{padding:13px}.visual-panel{padding:21px}.keyboard-tip{display:none}.control{padding:0 11px}.hero-index{min-width:120px}.chips{grid-template-columns:repeat(3,auto)}}
+@media(max-width:800px){.site-header{height:84px}.nav-pill{display:none}.workspace{grid-template-columns:1fr}.side-panel{display:grid;grid-template-columns:1fr 1fr}.metrics-panel{border-bottom:0;border-right:1px solid var(--border)}.knowledge-grid{grid-template-columns:1fr}.catalogue{flex-direction:column;align-items:flex-start}.chips{grid-template-columns:repeat(5,auto)}}
+@media(max-width:520px){.page-wrap{padding:0 15px}.site-header{height:74px}.header-link{font-size:8px;max-width:92px;line-height:1.6;text-align:right}.brand-mark{width:36px;height:36px}.brand-text{font-size:14px}.hero-row{margin-bottom:27px}.hero-index{display:none}main{padding-top:35px}h1{font-size:44px}.lead{font-size:12px}.visual-panel,.knowledge-card{padding:15px}.panel-heading h2{font-size:15px}.panel-heading h2 span{display:block;margin:3px 0 0}.square-icon{width:33px;height:33px}.status-badge{font-size:10px;padding:6px}.plot{margin-top:18px}.plot-area{height:270px;margin:0 9px}.bars{inset:20px 4px 21px;gap:2px}.bar-value{font-size:9px}.legend{gap:12px;font-size:10px}.transport{gap:7px}.control{flex:1 1 calc(50% - 5px)}.activity-box{margin-top:16px}.side-panel{grid-template-columns:1fr}.metrics-panel{border-right:0;border-bottom:1px solid var(--border)}.metric{padding:15px}.chips{grid-template-columns:repeat(5,1fr);width:100%}.chips span{text-align:center;padding:8px 3px}.catalogue{padding:18px}footer{font-size:8px;gap:15px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+</style>
+  <script>
+/* Generated by npm run build. Edit src/bubble-machine.js or web/app.js, not this file. */
+(() => {
+const boot = () => {
+'use strict';
+/** One deterministic, observable transition per adjacent comparison. */
+class BubbleMachine {
+  constructor(values) { this.reset(values); }
+
+  reset(values) {
+    if (!Array.isArray(values) || !values.every(Number.isSafeInteger)) {
+      throw new TypeError('BubbleMachine expects an array of safe integers');
+    }
+    this.initial = [...values];
+    this.values = [...values];
+    this.pass = 0;
+    this.index = 0;
+    this.comparisons = 0;
+    this.swaps = 0;
+    this.swappedThisPass = false;
+    this.done = values.length < 2;
+    this.last = null;
+    return this.snapshot();
+  }
+
+  snapshot() {
+    return {
+      values: [...this.values],
+      pass: this.pass,
+      index: this.index,
+      comparisons: this.comparisons,
+      swaps: this.swaps,
+      done: this.done,
+      sortedFrom: this.done ? 0 : this.values.length - this.pass,
+      last: this.last ? { ...this.last } : null
+    };
+  }
+
+  step() {
+    if (this.done) return this.snapshot();
+    const i = this.index;
+    const left = this.values[i];
+    const right = this.values[i + 1];
+    const swapped = left > right;
+    if (swapped) {
+      [this.values[i], this.values[i + 1]] = [right, left];
+      this.swaps++;
+      this.swappedThisPass = true;
+    }
+    this.comparisons++;
+    this.index++;
+    let passFinished = false;
+    let earlyExit = false;
+    if (this.index >= this.values.length - 1 - this.pass) {
+      passFinished = true;
+      this.pass++;
+      this.index = 0;
+      if (!this.swappedThisPass) {
+        this.done = true;
+        earlyExit = true;
+      } else if (this.pass >= this.values.length - 1) {
+        this.done = true;
+      }
+      this.swappedThisPass = false;
+    }
+    this.last = { i, left, right, swapped, passFinished, earlyExit };
+    return this.snapshot();
+  }
+}
+
+const $ = id => document.getElementById(id);
+const ui = {
+  bars: $('bars'), statusText: $('statusText'), statusBadge: $('statusBadge'),
+  arraySummary: $('arraySummary'), progressText: $('progressText'),
+  progressBar: $('progressBar'), progressFill: $('progressFill'),
+  playBtn: $('playBtn'), playText: $('playText'), pauseBtn: $('pauseBtn'),
+  stepBtn: $('stepBtn'), resetBtn: $('resetBtn'), shuffleBtn: $('shuffleBtn'),
+  activity: $('activity'), compStat: $('compStat'), swapStat: $('swapStat'),
+  passStat: $('passStat'), sizeStat: $('sizeStat'), sizeRange: $('sizeRange'),
+  speedRange: $('speedRange'), sizeOutput: $('sizeOutput'), speedOutput: $('speedOutput'),
+  preset: $('preset'), customInput: $('customInput'), applyBtn: $('applyBtn'),
+  inputMessage: $('inputMessage')
+};
+
+const randomInt = (from, to) => Math.floor(Math.random() * (to - from + 1)) + from;
+function generate(length, type) {
+  const values = Array.from({ length }, () => randomInt(9, 98));
+  if (type === 'sorted' || type === 'nearly' || type === 'reverse') {
+    values.sort((a, b) => a - b);
+  }
+  if (type === 'reverse') values.reverse();
+  if (type === 'nearly' && values.length >= 4) {
+    const i = randomInt(0, values.length - 2);
+    const j = randomInt(i + 1, values.length - 1);
+    [values[i], values[j]] = [values[j], values[i]];
+  }
+  return values;
+}
+
+let initial = generate(22, 'random');
+let machine = new BubbleMachine(initial);
+let isRunning = false;
+let timer = null;
+let isPaused = false;
+const maxComparisons = n => n * (n - 1) / 2;
+const delay = () => Math.round(1030 / Math.pow(1.95, Number(ui.speedRange.value) - 1));
+
+function stop(pause = false) {
+  isRunning = false;
+  clearTimeout(timer);
+  timer = null;
+  isPaused = pause && machine.comparisons > 0 && !machine.done;
+}
+
+function setup(values) {
+  stop();
+  initial = [...values];
+  machine.reset(initial);
+  ui.sizeRange.value = String(Math.min(48, Math.max(2, initial.length)));
+  ui.sizeOutput.textContent = initial.length.toString();
+  ui.inputMessage.classList.remove('error');
+  ui.inputMessage.textContent = '填入数字后点击「应用自定义数组」，支持负数和重复值（2–48 项）。';
+  render();
+}
+
+function render() {
+  const snap = machine.snapshot();
+  const n = snap.values.length;
+  const min = Math.min(...snap.values);
+  const max = Math.max(...snap.values);
+  const spread = max - min || 1;
+  const last = snap.last;
+  const fragment = document.createDocumentFragment();
+  snap.values.forEach((value, i) => {
+    const bar = document.createElement('div');
+    const height = 12 + ((value - min) / spread) * 76;
+    bar.className = 'bar';
+    bar.style.height = `${height}%`;
+    const comparing = !snap.done && last && (i === last.i || i === last.i + 1);
+    if (snap.done || i >= snap.sortedFrom) bar.classList.add('sorted');
+    else if (comparing) bar.classList.add('comparing');
+    if (n <= 24) {
+      const label = document.createElement('span');
+      label.className = 'bar-value';
+      label.textContent = String(value);
+      bar.appendChild(label);
+    }
+    bar.title = `下标 ${i}：${value}${snap.done || i >= snap.sortedFrom ? '（已排序）' : comparing ? '（正在比较）' : ''}`;
+    fragment.appendChild(bar);
+  });
+  ui.bars.replaceChildren(fragment);
+  ui.bars.setAttribute('aria-label', `当前数组：${snap.values.join('，')}。比较 ${snap.comparisons} 次，交换 ${snap.swaps} 次`);
+  ui.arraySummary.textContent = `${n} ELEMENT${n === 1 ? '' : 'S'}`;
+  ui.compStat.textContent = String(snap.comparisons);
+  ui.swapStat.textContent = String(snap.swaps);
+  ui.passStat.textContent = String(snap.pass);
+  ui.sizeStat.textContent = String(n);
+  const progress = snap.done ? 100 : Math.round((snap.comparisons / (maxComparisons(n) || 1)) * 100);
+  ui.progressFill.style.width = `${progress}%`;
+  ui.progressText.textContent = `${progress}%`;
+  ui.progressBar.setAttribute('aria-valuenow', String(progress));
+
+  ui.statusBadge.className = 'status-badge' + (snap.done ? ' complete' : isRunning ? ' running' : isPaused ? ' paused' : '');
+  ui.statusText.textContent = snap.done ? '排序完成' : isRunning ? '正在排序' : isPaused ? '已暂停' : '准备就绪';
+  ui.playText.textContent = snap.done ? '再来一次' : isPaused ? '继续排序' : '开始排序';
+  ui.pauseBtn.disabled = !isRunning;
+  ui.stepBtn.disabled = snap.done;
+
+  if (snap.done) {
+    ui.activity.textContent = last?.earlyExit
+      ? `提前结束！这一轮没有发生交换。共 ${snap.comparisons} 次比较、${snap.swaps} 次交换。`
+      : `排序完成！${n} 个数字已升序排列，累计 ${snap.comparisons} 次比较、${snap.swaps} 次交换。`;
+  } else if (last) {
+    const action = last.swapped ? '左边更大，已交换位置' : '顺序正确，无需交换';
+    ui.activity.textContent = `比较 ${last.left} 与 ${last.right}：${action}。${last.passFinished ? ' 本轮结束。' : ''}`;
+  } else {
+    ui.activity.textContent = '等待开始 — 点击“开始排序”，看看数字如何找到自己的位置。';
+  }
+  document.querySelectorAll('.code-line').forEach(line => line.classList.remove('active'));
+  if (snap.done) document.querySelector('[data-line="7"]').classList.add('active');
+  else if (last) document.querySelector(`[data-line="${last.swapped ? '5' : '4'}"]`).classList.add('active');
+}
+
+function tick() {
+  if (!isRunning) return;
+  machine.step();
+  if (machine.done) stop();
+  render();
+  if (isRunning) timer = setTimeout(tick, delay());
+}
+function play() {
+  if (isRunning) return;
+  if (machine.done) machine.reset(initial);
+  isRunning = true;
+  isPaused = false;
+  tick();
+}
+function pause() { stop(true); render(); }
+function step() {
+  stop(true);
+  machine.step();
+  isPaused = !machine.done;
+  render();
+}
+
+ui.playBtn.addEventListener('click', play);
+ui.pauseBtn.addEventListener('click', pause);
+ui.stepBtn.addEventListener('click', step);
+ui.resetBtn.addEventListener('click', () => setup(initial));
+ui.shuffleBtn.addEventListener('click', () => {
+  setup(generate(Number(ui.sizeRange.value), ui.preset.value));
+  ui.activity.textContent = `已按“${ui.preset.options[ui.preset.selectedIndex].textContent}”重新生成数组。`;
+  if (ui.customInput.value.trim()) {
+    ui.inputMessage.textContent = '提示：上方重新生成使用预设分布；输入框中的数字请点击「应用自定义数组」。';
+  }
+});
+ui.sizeRange.addEventListener('input', () => setup(generate(Number(ui.sizeRange.value), ui.preset.value)));
+ui.speedRange.addEventListener('input', () => { ui.speedOutput.textContent = `${ui.speedRange.value}×`; });
+ui.preset.addEventListener('change', () => setup(generate(Number(ui.sizeRange.value), ui.preset.value)));
+
+function applyCustom() {
+  const raw = ui.customInput.value.trim();
+  const tokens = raw.split(/[\s,，、;；]+/).filter(Boolean);
+  if (tokens.length < 2 || tokens.length > 48 || !tokens.every(s => /^[-+]?\d+$/.test(s))) {
+    inputError('请输入 2–48 个整数，用逗号或空格分隔。'); return;
+  }
+  const values = tokens.map(Number);
+  if (!values.every(Number.isSafeInteger) || values.some(v => Math.abs(v) > 999)) {
+    inputError('每个数字必须是 -999 到 999 之间的整数。'); return;
+  }
+  setup(values);
+  ui.sizeOutput.textContent = String(values.length);
+  ui.preset.value = 'random';
+  ui.customInput.value = '';
+  ui.inputMessage.textContent = `成功载入 ${values.length} 个整数：${values.join(', ')}。`;
+  ui.activity.textContent = '已载入自定义数组。现在可以开始排序。';
+}
+function inputError(message) {
+  ui.inputMessage.classList.add('error');
+  ui.inputMessage.textContent = message;
+}
+ui.applyBtn.addEventListener('click', applyCustom);
+ui.customInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyCustom(); });
+document.addEventListener('keydown', e => {
+  if (e.altKey || e.ctrlKey || e.metaKey || ['INPUT','SELECT','TEXTAREA','BUTTON'].includes(document.activeElement?.tagName)) return;
+  if (e.code === 'Space') { e.preventDefault(); isRunning ? pause() : play(); }
+  else if (e.code === 'ArrowRight') { e.preventDefault(); step(); }
+});
+render();
+
+};
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot, { once: true });
+else boot();
+})();
+
+</script>
+</head>
+<body>
+  <div class="ambient ambient-left" aria-hidden="true"></div>
+  <div class="ambient ambient-right" aria-hidden="true"></div>
+  <div class="page-wrap">
+    <header class="site-header">
+      <a href="./index.html" class="brand" aria-label="Sorting Lab 首页">
+        <span class="brand-mark"><span class="mark-bars"><i></i><i></i><i></i></span></span>
+        <span class="brand-text">SORTING<span>LAB</span><small>ALGORITHM PLAYGROUND</small></span>
+      </a>
+      <span class="nav-pill"><span class="online-indicator"></span> INTERACTIVE LEARNING STUDIO</span>
+      <a href="https://github.com/DearJIAN/classic-sorting-lab/blob/main/src/sorts.js" class="header-link">10 CLASSIC ALGORITHMS <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main>
+      <div class="eyebrow"><span class="eyebrow-line"></span> EXPERIMENT 01 <span class="eyebrow-divider">/</span> 10</div>
+      <div class="hero-row">
+        <div>
+          <h1>让每一次<span>排序</span><br>都清晰可见<span class="hero-dot">.</span></h1>
+          <p class="lead">不只是理解算法，更要<span>看见</span>算法。逐帧观察数据比较、位置交换与有序序列的形成。</p>
+        </div>
+        <div class="hero-index" aria-hidden="true"><span>01</span><small>BUBBLE SORT</small></div>
+      </div>
+
+      <section class="workspace" aria-label="冒泡排序可视化实验室">
+        <div class="visual-panel">
+          <div class="panel-header">
+            <div class="panel-heading">
+              <span class="square-icon">▥</span>
+              <div><div class="section-kicker">LIVE VISUALIZATION</div><h2>冒泡排序 <span>BUBBLE SORT</span></h2></div>
+            </div>
+            <span class="status-badge" id="statusBadge"><span></span><span id="statusText" aria-live="polite">准备就绪</span></span>
+          </div>
+
+          <div class="plot">
+            <div class="plot-header"><span><span class="tiny-square"></span> ARRAY VISUALIZER</span><span id="arraySummary">22 ELEMENTS</span></div>
+            <div class="plot-area">
+              <div class="plot-lines" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <div id="bars" class="bars" role="img" aria-label="待排序数组的柱状图"></div>
+              <div class="axis-bottom" aria-hidden="true"></div>
+            </div>
+            <div class="legend"><span><i class="legend-block default"></i> 未排序</span><span><i class="legend-block active"></i> 正在比较</span><span><i class="legend-block sorted"></i> 已排序</span></div>
+          </div>
+
+          <div class="progress-area">
+            <div class="progress-caption"><span>SORTING PROGRESS</span><strong id="progressText">0%</strong></div>
+            <div class="progress-track" role="progressbar" aria-label="排序进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><div id="progressFill"></div></div>
+          </div>
+
+          <div class="transport">
+            <button class="control primary" id="playBtn"><span class="play-icon">▶</span> <span id="playText">开始排序</span></button>
+            <button class="control" id="pauseBtn" disabled><span class="pause-icon">Ⅱ</span> 暂停</button>
+            <button class="control" id="stepBtn"><span class="forward-icon">↦</span> 单步执行</button>
+            <button class="control muted" id="resetBtn"><span class="reset-icon">↺</span> 重置</button>
+            <div class="keyboard-tip">SPACE <span>播放 / 暂停</span></div>
+          </div>
+
+          <div class="activity-box"><span class="activity-icon">↳</span><div><span class="activity-label">CURRENT OPERATION</span><p id="activity" aria-live="polite">等待开始 — 点击“开始排序”，看看数字如何找到自己的位置。</p></div></div>
+        </div>
+
+        <aside class="side-panel">
+          <section class="metrics-panel">
+            <div class="side-heading"><span>01</span> 实时统计 <small>LIVE STATS</small></div>
+            <div class="metrics-grid">
+              <div class="metric"><span>比较次数 <small>COMPARISONS</small></span><strong id="compStat">0</strong></div>
+              <div class="metric"><span>交换次数 <small>SWAPS</small></span><strong id="swapStat">0</strong></div>
+              <div class="metric"><span>完成轮次 <small>PASSES</small></span><strong id="passStat">0</strong></div>
+              <div class="metric"><span>数组长度 <small>ITEMS</small></span><strong id="sizeStat">22</strong></div>
+            </div>
+          </section>
+
+          <section class="settings-panel">
+            <div class="side-heading"><span>02</span> 实验参数 <small>CONTROLS</small></div>
+            <div class="field-head"><label for="sizeRange">数组长度</label><output id="sizeOutput" for="sizeRange">22</output></div>
+            <input type="range" id="sizeRange" min="2" max="48" value="22" step="1" aria-label="数组长度">
+            <div class="range-ends"><span>2 ELEMENTS</span><span>48 ELEMENTS</span></div>
+            <div class="field-head speed-head"><label for="speedRange">动画速度</label><output id="speedOutput" for="speedRange">3×</output></div>
+            <input type="range" id="speedRange" min="1" max="5" value="3" step="1" aria-label="动画速度">
+            <div class="range-ends"><span>SLOW</span><span>FAST</span></div>
+            <div class="field-head distribution-head"><label for="preset">数据分布</label></div>
+            <div class="select-wrap"><select id="preset" aria-label="数据分布"><option value="random">随机乱序</option><option value="reverse">完全逆序</option><option value="nearly">近乎有序</option><option value="sorted">完全有序（观察提前退出）</option></select></div>
+            <button class="shuffle-btn" id="shuffleBtn">⤨ &nbsp; 按当前设置重新生成 <span>↗</span></button>
+            <div class="custom-data">
+              <label for="customInput">或输入自定义整数数组</label>
+              <div class="custom-row"><input id="customInput" type="text" placeholder="例如 8, 3, 5, 1, 7" spellcheck="false" autocomplete="off"><button id="applyBtn" type="button">应用自定义数组</button></div>
+              <p class="input-message" id="inputMessage" role="status">填入数字后点击「应用自定义数组」，支持负数和重复值（2–48 项）。</p>
+            </div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="knowledge-grid" aria-label="算法知识">
+        <div class="knowledge-card code-card">
+          <div class="card-top"><div><div class="section-kicker">UNDER THE HOOD</div><h2>算法伪代码</h2></div><span class="card-top-tag">PSEUDOCODE</span></div>
+          <div class="code-window" aria-label="冒泡排序伪代码">
+            <div class="code-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="code-line" data-line="1"><span>01</span><code><b>for</b> pass = 0 to n - 2:</code></div>
+            <div class="code-line" data-line="2"><span>02</span><code>  swapped = <b>false</b></code></div>
+            <div class="code-line" data-line="3"><span>03</span><code>  <b>for</b> i = 0 to n - 2 - pass:</code></div>
+            <div class="code-line" data-line="4"><span>04</span><code>    <em>if</em> a[i] &gt; a[i + 1]:</code></div>
+            <div class="code-line" data-line="5"><span>05</span><code>      swap(a[i], a[i + 1])</code></div>
+            <div class="code-line" data-line="6"><span>06</span><code>      swapped = <b>true</b></code></div>
+            <div class="code-line" data-line="7"><span>07</span><code>  <em>if</em> !swapped: <b>break</b></code></div>
+          </div>
+          <p class="code-note">每轮相邻元素两两比较，较大的元素逐渐“冒泡”至数组末端。如果一轮没有交换，数组就已经有序。</p>
+        </div>
+        <div class="knowledge-card complexity-card">
+          <div class="card-top"><div><div class="section-kicker">ALGORITHM PROFILE</div><h2>算法特性</h2></div><span class="card-top-tag">ANALYSIS</span></div>
+          <div class="complexity-list"><div><span>最佳时间复杂度</span><strong class="good">O(n)</strong></div><div><span>平均时间复杂度</span><strong>O(n²)</strong></div><div><span>最坏时间复杂度</span><strong>O(n²)</strong></div><div><span>额外空间复杂度</span><strong>O(1)</strong></div><div><span>排序稳定性</span><strong class="good">稳定 STABLE</strong></div></div>
+          <div class="tip"><span>✦</span><p>由于采用了“无交换则提前结束”的优化，已经有序的数组只需 <strong>n − 1 次比较</strong>。</p></div>
+        </div>
+      </section>
+      <section class="catalogue"><div><div class="section-kicker">THE COMPLETE COLLECTION</div><h2>不止冒泡：10 大经典排序算法</h2><p>源码中还包含另外 9 种实现，全部提供 JavaScript API 与自动化测试。</p></div><div class="chips"><span>冒泡</span><span>选择</span><span>插入</span><span>希尔</span><span>归并</span><span>快速</span><span>堆</span><span>计数</span><span>基数</span><span>桶</span></div></section>
+    </main>
+    <footer><span>SORTING LAB / EXPERIMENT 01</span><span>BUILT FOR CURIOUS MINDS <b>✦</b> 2026</span></footer>
+  </div>
+</body>
+</html>
