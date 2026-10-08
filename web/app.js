@@ -1,7 +1,7 @@
 import { catalog, generateTrace } from '../src/trace-engine.js';
 
 const $ = id => document.getElementById(id);
-const ui = {
+const ui={
  options:$('algorithmGrid'),bars:$('bars'),name:$('algorithmTitle'),
  category:$('algorithmCategory'),desc:$('algorithmDesc'),code:$('pseudocode'),
  status:$('statusBadge'),operation:$('activity'),progress:$('progressFill'),
@@ -169,8 +169,8 @@ function render(previous){
  renderBars(f,previous);renderInspector(f);renderCode(f);
  ui.compStat.textContent=f.comparisons;ui.swapStat.textContent=f.swaps;
  ui.writeStat.textContent=f.writes;ui.passStat.textContent=f.pass;
- ui.stepStat.textContent=cursor+' / '+(frames.length-1);ui.timeline.value=String(cursor);
- ui.sizeStat.textContent=n+' ELEMENTS';ui.operation.textContent=f.detail;
+ ui.stepStat.textContent=cursor+'/'+(frames.length-1);ui.timeline.value=String(cursor);
+ ui.sizeStat.textContent=String(n);ui.operation.textContent=f.detail;
  const percent=cursor/Math.max(1,frames.length-1)*100;
  ui.progress.style.width=percent.toFixed(1)+'%';
  ui.progressText.textContent=Math.round(percent)+'%';
