@@ -20,7 +20,7 @@ export function generateTrace(input,algorithm='bubble'){
  const a=input.slice(),n=a.length;const frames=[];let comparisons=0,swaps=0,writes=0,pass=0;
  let context={},confirmed=new Set();
  function snap(kind='init',active=[],detail='等待开始',sorted=[]){
-  const permanent=[...confirmed].filter(i=>i>=0&&i<n);
+  const permanent=(kind==='complete'?Array.from({length:n},(_,i)=>i):[...confirmed]).filter(i=>i>=0&&i<n);
   const local=['insertion','merge','shell','quick','counting','radix','bucket'].includes(algorithm)?sorted.filter(i=>i>=0&&i<n):[];
   frames.push({values:a.slice(),kind,active:active.filter(i=>i>=0&&i<n),detail,
    sorted:permanent,localSorted:local,meta:JSON.parse(JSON.stringify(context)),comparisons,swaps,writes,pass});
@@ -72,7 +72,7 @@ export function generateTrace(input,algorithm='bubble'){
   }
  }else if(algorithm==='bucket'){
   if(n>1){const min=Math.min(...a),max=Math.max(...a),count=Math.max(1,Math.ceil(Math.sqrt(n))),buckets=Array.from({length:count},()=>[]);
-   if(min===max){round('所有数据相等，无需移动')}else{for(let i=0;i<n;i++){const idx=Math.min(count-1,Math.floor((a[i]-min)/(max-min)*count));buckets[idx].push(a[i]);context={type:'bucket',buckets:buckets.map(b=>b.slice()),min,max,selected:idx,phase:'distribute',activeValue:a[i]};snap('bucket',[i],'将 '+a[i]+' 分配到桶 '+(idx+1)+'/'+count)}round('完成 '+count+' 个桶的分配');let k=0;for(let bi=0;bi<count;bi++){const b=buckets[bi];const update=(phase,focus)=>{context={type:'bucket',buckets:buckets.map(q=>q.slice()),min,max,selected:bi,phase,focus}};update('sort',null);
+   if(min===max){buckets[0].push(...a);context={type:'bucket',buckets:buckets.map(q=>q.slice()),min,max,selected:0,phase:'constant'};round('所有数据相等，无需移动')}else{for(let i=0;i<n;i++){const idx=Math.min(count-1,Math.floor((a[i]-min)/(max-min)*count));buckets[idx].push(a[i]);context={type:'bucket',buckets:buckets.map(b=>b.slice()),min,max,selected:idx,phase:'distribute',activeValue:a[i]};snap('bucket',[i],'将 '+a[i]+' 分配到桶 '+(idx+1)+'/'+count)}round('完成 '+count+' 个桶的分配');let k=0;for(let bi=0;bi<count;bi++){const b=buckets[bi];const update=(phase,focus)=>{context={type:'bucket',buckets:buckets.map(q=>q.slice()),min,max,selected:bi,phase,focus}};update('sort',null);
     for(let i=1;i<b.length;i++){const key=b[i];let j=i-1;while(j>=0){update('sort',j);comparisons++;snap('compare',[],'桶 '+(bi+1)+' 内比较 '+b[j]+' 与 '+key);
       if(b[j]<=key)break;b[j+1]=b[j];update('shift',j+1);writes++;snap('bucket-write',[],'桶 '+(bi+1)+' 内右移 '+b[j]);j--}
      b[j+1]=key;update('insert',j+1);writes++;snap('bucket-write',[],'桶 '+(bi+1)+' 内插入 '+key)}
