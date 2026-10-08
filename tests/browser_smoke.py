@@ -39,7 +39,7 @@ with sync_playwright() as p:
   assert page.locator('#zeroLine').get_attribute('style') is not None
   page.locator('[data-algo="quick"]').click()
   page.locator('#stepBtn').click()
-  assert 'CURRENT PIVOT' in page.locator('#inspectorVisual').inner_text()
+  assert 'PIVOT /' in page.locator('#inspectorVisual').inner_text()
   page.locator('#timelineRange').fill('4')
   assert page.locator('#stepStat').inner_text().startswith('4/')
   page.locator('#backBtn').click()
