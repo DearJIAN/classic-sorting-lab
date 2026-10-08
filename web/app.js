@@ -352,7 +352,7 @@ function renderDualSide(side){
  const statsEl=left?ui.dualStatsLeft:ui.dualStatsRight;
  const n=f.values.length;if(dual.nodes[side].length!==n)makeDualBars(side,n);
  const min=Math.min(0,...initial),max=Math.max(0,...initial),range=Math.max(1,max-min),zero=(0-min)/range*100;
- zeroEl.style.bottom=zero+'%';
+ zeroEl.style.bottom='calc(18px + (100% - 36px) * '+(zero/100)+')';
  scaleEl.textContent='['+min+', '+max+']';
  frameEl.textContent=frameIndex+' / '+(framesForSide.length-1);
  activityEl.textContent=f.detail;
