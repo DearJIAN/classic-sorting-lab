@@ -82,6 +82,62 @@ with sync_playwright() as p:
   page.locator('#timelineRange').fill('1')
   assert page.locator('.quick-lane .quick-item').count()==5
   assert page.locator('.bar-track[data-pointer="I"],.bar-track[data-pointer="IJ"]').count()>=1
+  # V3.0: two simultaneous, synchronized views on the same actual input.
+  page.set_viewport_size({'width':1360,'height':900})
+  page.locator('#customInput').fill('8,-3,5,-3,7,0')
+  page.locator('#applyBtn').click()
+  page.locator('[data-algo="bubble"]').click()
+  page.locator('#tabCompare').click()
+  page.locator('#compareSelect').select_option('quick')
+  page.locator('#compareBtn').click()
+  assert page.locator('#dualWorkspace').is_visible()
+  assert page.locator('#dualBarsLeft .dual-bar').count()==6
+  assert page.locator('#dualBarsRight .dual-bar').count()==6
+  assert page.locator('#dualFrameLeft').inner_text().startswith('0 /')
+  assert page.locator('#dualFrameRight').inner_text().startswith('0 /')
+  assert page.locator('.compare-table tbody tr').count()==4
+  # Same normalized progress means potentially different native frame indices.
+  page.locator('#dualTimeline').fill('500')
+  assert page.locator('#dualProgressText').inner_text()=='50.0%'
+  a=page.locator('#dualFrameLeft').inner_text()
+  b=page.locator('#dualFrameRight').inner_text()
+  assert not a.startswith('0 /') and not b.startswith('0 /')
+  assert page.locator('#dualStatsLeft strong').count()==4
+  assert page.locator('#dualStatsRight strong').count()==4
+  assert page.locator('#dualBarsLeft').get_attribute('aria-label').find('8')!=-1 or page.locator('#dualBarsLeft').get_attribute('aria-label')
+  page.locator('#dualBackBtn').click()
+  assert page.locator('#dualTimeline').input_value()!='500'
+  page.locator('#dualResetBtn').click()
+  assert page.locator('#dualTimeline').input_value()=='0'
+  page.locator('#dualPlayBtn').click()
+  page.wait_for_timeout(240)
+  page.locator('#dualPauseBtn').click()
+  assert int(page.locator('#dualTimeline').input_value())>0
+  with page.expect_download() as download_info:
+   page.locator('#dualExportJson').click()
+  download=download_info.value
+  assert download.suggested_filename.endswith('.json')
+  import json
+  report=json.loads(download.path().read_text(encoding='utf-8'))
+  assert report['input']==[8,-3,5,-3,7,0]
+  assert [x['algorithm'] for x in report['results']]==['bubble','quick']
+  assert len(report['results'][0]['frames'])>len(report['results'][1]['frames'])
+  with page.expect_download() as csv_info:
+   page.locator('#dualExportCsv').click()
+  csv_download=csv_info.value
+  assert csv_download.suggested_filename.endswith('.csv')
+  csv=csv_download.path().read_text(encoding='utf-8-sig')
+  assert csv.startswith('algorithm,name,step,progress,kind,detail,values')
+  assert '"bubble"' in csv and '"quick"' in csv
+  # Switching the main algorithm invalidates stale results.
+  page.locator('[data-algo="merge"]').click()
+  assert page.locator('#dualWorkspace').is_hidden()
+  page.locator('#compareBtn').click()
+  assert page.locator('#dualWorkspace').is_visible()
+  assert '归并排序' in page.locator('#dualNameLeft').inner_text()
+  page.set_viewport_size({'width':390,'height':844})
+  assert page.evaluate('document.documentElement.scrollWidth <= window.innerWidth + 2')
+  assert page.locator('#dualPlayBtn').is_visible()
   assert not errors,errors
   print('PASS',mode,'10 algorithms, custom input, navigation, theme, play/pause, random arrays')
   page.close()

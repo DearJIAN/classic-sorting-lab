@@ -27,3 +27,12 @@ test('v2.2: real connected heap SVG and algorithm-specific animations are wired'
  assert.match(css,/\.heap-edge/);assert.match(css,/\.heap-value/);assert.match(css,/\.bar\.local-sorted/);
  assert.match(engine,/bucket-write/);assert.match(engine,/sparse-fallback/);
 });
+
+test('V3 dual panes, synchronized timeline and both download actions have matching controller bindings',async()=>{
+ const html=await read('web/index.html'),app=await read('web/app.js'),css=await read('web/styles.css'),build=await read('scripts/build-web.mjs');
+ const ids=['dualWorkspace','dualTimeline','dualProgressText','dualPlayBtn','dualPauseBtn','dualBackBtn','dualNextBtn','dualResetBtn','dualSpeed','dualExportJson','dualExportCsv','dualBarsLeft','dualBarsRight','dualZeroLeft','dualZeroRight','dualStatsLeft','dualStatsRight','dualFrameLeft','dualFrameRight'];
+ for(const id of ids)assert.match(html,new RegExp('id="'+id+'"'),id);
+ for(const name of ['function renderDualSide','function compareAlgorithms','function downloadDual','function seekDual','createExperimentReport','experimentReportToCsv'])assert.ok(app.includes(name),name);
+ assert.match(css,/\.dual-grid/);assert.match(css,/\.dual-bars/);assert.match(css,/#dualWorkspace\[hidden\]/);
+ assert.match(build,/createExperimentReport, experimentReportToCsv/);
+});
