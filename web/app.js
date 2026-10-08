@@ -108,65 +108,141 @@ function chip(text,variant=''){
 function row(values,focus=-1){
  return '<div class="struct-row">'+values.map((v,i)=>chip(v,i===focus?'emphasis':'')).join('')+'</div>';
 }
-function renderInspector(f){
- const meta=f.meta||{},values=f.values,active=f.active||[];let content='',caption='';
- if(algorithm==='quick'){
-  content='<div class="struct-label">CURRENT PIVOT / 枢轴</div>'+row([meta.pivot===undefined?'—':meta.pivot],0)
-  +'<div class="struct-spacer struct-label">双指针与当前分区</div>'
-  +'<div class="struct-row">'+chip('i = '+(meta.i??'—'),'highlight')+chip('j = '+(meta.j??'—'),'highlight')+chip('['+(meta.lo??0)+' .. '+(meta.hi??values.length-1)+']')+'</div>';
-  caption='黄色指针标识当前扫描位置，枢轴用于双指针分区。';
- }else if(algorithm==='merge'){
-  const l=meta.left||[],r=meta.right||[];
-  content='<div class="struct-label">LEFT BUFFER / 左半区</div>'+row(l.slice(0,18),meta.leftIndex)
-  +'<div class="struct-spacer struct-label">RIGHT BUFFER / 右半区</div>'+row(r.slice(0,18),meta.rightIndex)
-  +'<div class="struct-spacer struct-label">正在归并区间 '+htmlEscape((meta.range||['—','—']).join(' → '))+'</div>';
-  caption='辅助数组保留归并前的两段数据。高亮项为当前读取指针。';
- }else if(algorithm==='heap'){
-  const end=meta.end??values.length-1,levels=Math.min(4,Math.ceil(Math.log2(Math.min(end+1,15)+1)));
-  content='<div class="struct-label">MAX HEAP / 最大堆（二叉树视图）</div>';
-  for(let depth=0;depth<levels;depth++){
-   const from=Math.pow(2,depth)-1,to=Math.min(end+1,Math.pow(2,depth+1)-1);
-   if(from>=to)break;
-   content+='<div class="heap-level">'+values.slice(from,to).map((v,i)=>'<span class="mini-node '+(from+i===meta.root?'focus':'')+'" title="数组下标 '+(from+i)+'">'+htmlEscape(v)+'</span>').join('')+'</div>';
+function svgElement(name, attrs={}) {
+ const el=document.createElementNS('http://www.w3.org/2000/svg',name);
+ for(const [key,value] of Object.entries(attrs))el.setAttribute(key,String(value));
+ return el;
+}
+function heapCoordinates(i,width){
+ const level=Math.floor(Math.log2(i+1)),first=2**level-1;
+ return {x:(i-first+.5)*width/(2**level),y:43+level*75,level};
+}
+function renderHeapTree(f,previous){
+ const n=f.values.length,levels=Math.max(1,Math.floor(Math.log2(Math.max(1,n)))+1);
+ const width=Math.max(390,2**(levels-1)*48),height=levels*75+10;
+ let svg=ui.inspector.querySelector('svg.heap-tree');
+ if(!svg || Number(svg.dataset.size)!==n){
+  ui.inspector.replaceChildren();
+  const heading=document.createElement('div');heading.className='struct-label';
+  heading.textContent='MAX HEAP / 真实父子连接 · 可横向滚动';ui.inspector.append(heading);
+  const viewport=document.createElement('div');viewport.className='heap-viewport';
+  svg=svgElement('svg',{class:'heap-tree',width,height,viewBox:'0 0 '+width+' '+height,role:'img','aria-label':'二叉堆树形结构，包含 '+n+' 个元素'});
+  svg.dataset.size=String(n);
+  const edgeLayer=svgElement('g',{class:'heap-edges'});
+  const nodeLayer=svgElement('g',{class:'heap-nodes'});
+  for(let i=1;i<n;i++){
+   const a=heapCoordinates(Math.floor((i-1)/2),width),b=heapCoordinates(i,width);
+   const link=svgElement('line',{x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:'heap-edge','data-edge-child':i});edgeLayer.append(link);
   }
-  content+='<div class="struct-spacer struct-label">有效堆区间：0 – '+end+'；右侧为逐步归位区</div>';
-  caption='完整二叉树按数组下标展开；高亮节点为当前下滤父节点。';
+  for(let i=0;i<n;i++){
+   const {x,y}=heapCoordinates(i,width);
+   const g=svgElement('g',{class:'heap-node','data-heap-node':i,transform:'translate('+x+' '+y+')'});
+   const circle=svgElement('circle',{r:19,cx:0,cy:0,class:'heap-circle'});
+   const value=svgElement('text',{x:0,y:5,'text-anchor':'middle',class:'heap-value'});value.textContent=String(f.values[i]);
+   const index=svgElement('text',{x:0,y:32,'text-anchor':'middle',class:'heap-index'});index.textContent=String(i);
+   g.append(circle,value,index);nodeLayer.append(g);
+  }
+  svg.append(edgeLayer,nodeLayer);viewport.append(svg);ui.inspector.append(viewport);
+ }
+ const m=f.meta||{},end=Number.isInteger(m.end)?m.end:n-1;
+ const highlighted=new Set(m.selected||[]),fixed=new Set(f.sorted||[]);
+ for(let i=0;i<n;i++){
+  const node=svg.querySelector('[data-heap-node="'+i+'"]');
+  node.classList.toggle('heap-focus',highlighted.has(i));
+  node.classList.toggle('heap-fixed',fixed.has(i)||i>end);
+  const value=node.querySelector('.heap-value');value.textContent=String(f.values[i]);
+ }
+ for(const line of svg.querySelectorAll('.heap-edge')){
+  line.classList.toggle('inactive',Number(line.dataset.edgeChild)>end);
+ }
+ if(previous!==undefined && cursor===previous+1 && f.kind==='swap' && f.active.length===2 &&
+    !window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  const [i,j]=f.active;
+  if(i!==j){
+   const p=heapCoordinates(i,width),q=heapCoordinates(j,width);
+   for(const [target,from] of [[i,j],[j,i]]){
+    const label=svg.querySelector('[data-heap-node="'+target+'"] .heap-value');
+    const src=from===i?p:q,dest=target===i?p:q;
+    if(label&&label.animate)label.animate([
+      {transform:'translate('+(src.x-dest.x)+'px,'+(src.y-dest.y)+'px)',opacity:1},
+      {transform:'translate(0px,0px)',opacity:1}
+    ],{duration:Math.min(420,Math.max(170,speed()*.85)),easing:'ease-in-out'});
+   }
+  }
+ }
+ const note=document.createElement('div');note.className='heap-caption';
+ note.textContent='有效堆：0–'+Math.max(0,end)+' · 已归位：'+(n-1-end)+' · 当前阶段：'+(m.phase||'构建中');
+ const old=ui.inspector.querySelector('.heap-caption');if(old)old.replaceWith(note);else ui.inspector.append(note);
+ ui.inspectorCaption.textContent='每条连线对应数组父节点 ⌊(i−1)/2⌋；节点内是当前数值，下方小字是数组下标。交换时数值沿节点路径移动；超过堆边界的节点退出活动堆。';
+}
+function listChips(values,focus=-1,read=0){
+ return '<div class="struct-row">'+values.map((v,i)=>'<span class="struct-chip'+(i===focus?' emphasis':i<read?' consumed':'')+'">'+htmlEscape(v)+'</span>').join('')+'</div>';
+}
+function renderInspector(f,previous){
+ const meta=f.meta||{},values=f.values,active=f.active||[];let content='',caption='';
+ if(algorithm==='heap'){renderHeapTree(f,previous);return}
+ if(algorithm==='bubble'){
+  content='<div class="struct-label">ADJACENT ELEMENTS / 当前相邻元素</div>'+listChips(active.map(i=>'['+i+'] '+values[i]))
+   +'<div class="struct-spacer struct-label">扫描边界：'+(meta.end??'—')+' · 已归位 '+f.sorted.length+' / '+values.length+'</div>';
+  caption='相邻比较后，大数向右冒泡。已归位元素持续标记，若本轮无交换，全部元素直接确认为有序。';
+ }else if(algorithm==='selection'){
+  content='<div class="struct-label">MINIMUM CANDIDATE / 当前最小候选</div>'+listChips(['第 '+(meta.i??'—')+' 轮','min = '+(meta.min??'—'),'j = '+(meta.j??'—')])
+   +'<div class="struct-spacer struct-label">候选值：'+(meta.min===undefined?'—':values[meta.min])+' · 已归位 '+f.sorted.length+' 个</div>';
+  caption='不断扫描未排序区间，最小值候选随比较变化；左侧已确认部分不会重新变灰。';
+ }else if(algorithm==='insertion'){
+  content='<div class="struct-label">INSERTION KEY / 当前待插入元素</div>'+listChips(['key = '+(meta.key??'—'),'j = '+(meta.j??'—')])
+   +'<div class="struct-spacer struct-label">已经有序的前缀（仍可能右移）</div>'+listChips(values.slice(0,Math.max(1,meta.i??1)));
+  caption='淡绿色表示局部有序前缀，并不意味着下标已最终固定；元素右移时仍会更新。';
+ }else if(algorithm==='shell'){
+  const gap=meta.gap??1,group=Number.isInteger(meta.i)?meta.i%gap:0,part=values.filter((_,i)=>i%gap===group);
+  content='<div class="struct-label">GAPPED INSERTION / 分组插入</div>'+listChips(['gap = '+gap,'key = '+(meta.key??'—'),'j = '+(meta.j??'—')])
+  +'<div class="struct-spacer struct-label">当前余数类 '+group+'（数组下标 mod gap）</div>'+listChips(part);
+  caption='随 gap 逐步缩小，间隔相同的元素属于一组；gap = 1 时完成最后一轮插入。';
+ }else if(algorithm==='quick'){
+  const lo=meta.lo??0,hi=meta.hi??values.length-1,pivot=meta.pivot;
+  content='<div class="struct-label">PIVOT / 当前枢轴值</div>'+listChips([pivot===undefined?'—':pivot],0)
+  +'<div class="struct-spacer struct-label">左右扫描指针</div>'+listChips(['i = '+(meta.i??'—'),'j = '+(meta.j??'—'),'['+lo+' … '+hi+']'])
+  +'<div class="struct-spacer struct-label">当前分区 / 下标标签：I 为左指针，J 为右指针</div>'
+  +'<div class="quick-lane">'+values.slice(lo,hi+1).map((v,d)=>{const i=lo+d,flag=(i===meta.i?'I':'')+(i===meta.j?'J':'');return '<div class="quick-item'+(flag?' active':'')+'"><small>'+i+'</small><strong>'+htmlEscape(v)+'</strong><em>'+flag+'</em></div>'}).join('')+'</div>';
+  caption='枢轴是当前分区选定的数值，不保证它始终位于同一个数组下标；指针根据比较结果向内移动。';
+ }else if(algorithm==='merge'){
+  const left=meta.left||[],right=meta.right||[],range=meta.range||[];
+  content='<div class="struct-label">LEFT BUFFER / 左辅助数组 · 已读 '+(meta.leftIndex??0)+'</div>'+listChips(left,meta.leftIndex,meta.leftIndex)
+  +'<div class="struct-spacer struct-label">RIGHT BUFFER / 右辅助数组 · 已读 '+(meta.rightIndex??0)+'</div>'+listChips(right,meta.rightIndex,meta.rightIndex)
+  +'<div class="struct-spacer struct-label">回写目标：a['+(meta.writeIndex??'—')+'] · 阶段：'+htmlEscape(meta.phase||'待命')+'</div>'
+  +'<div class="struct-label">当前归并区间 ['+(range[0]??'—')+', '+(range[1]===undefined?'—':range[1]-1)+']</div>';
+  caption='比较时指针高亮；写入时回填目标随帧变化，灰色数字为已消费的缓冲区元素。归并区间的局部有序不等于最终归位。';
  }else if(algorithm==='counting'){
-  const counts=meta.counts||[];
-  content='<div class="struct-label">FREQUENCY MAP / 整数频次表</div><div class="bucket-list">'
-   +counts.slice(0,14).map(([key,count])=>'<div class="bucket-item"><span class="bucket-number">'+htmlEscape(key)+'</span><div class="bucket-values">'+chip('× '+count,count?'emphasis':'')+'</div></div>').join('')
-   +(counts.length>14?'<div class="struct-label">还有 '+(counts.length-14)+' 个整数值未展示</div>':'')+'</div>';
-  caption='随计数阶段实时更新频次；本实现使用 Map 以支持负数和较大整数范围。';
+  const counts=meta.counts||[],total=Math.max(1,...counts.map(x=>x[1]));
+  content='<div class="struct-label">FREQUENCY HISTOGRAM / 频次表'+(meta.mode==='sparse-fallback'?' · 稀疏回退':' · 稠密计数')+'</div>'
+   +'<div class="counting-list">'+counts.map(([key,count])=>'<div class="counting-item'+(key===meta.activeKey?' focus':'')+'"><span>'+htmlEscape(key)+'</span><div class="counting-track"><i style="width:'+(100*count/total).toFixed(2)+'%"></i></div><strong>'+count+'</strong></div>').join('')+'</div>';
+  if(!counts.length)content+='<p class="filler">尚未开始频次统计。</p>';
+  caption=(meta.phase==='write'?'正在按数值从小到大回填，右侧计数会同步减少。':'当前从左到右统计每个整数的出现次数。')+(meta.mode==='sparse-fallback'?' 数值跨度过大时自动使用稀疏映射回退。':'');
  }else if(algorithm==='radix'){
   const buckets=meta.buckets||Array.from({length:10},()=>[]);
-  content='<div class="struct-label">DIGIT BUCKETS / 10 个数位桶</div><div class="bucket-list">'
-   +buckets.map((b,i)=>'<div class="bucket-item"><span class="bucket-number">'+i+'</span><div class="bucket-values">'+(b.length?b.slice(-9).map(v=>'<span>'+htmlEscape(meta.sign==='negative'?-v:v)+'</span>').join(''):'<span>·</span>')+'</div></div>').join('')+'</div>';
-  caption='当前位权：'+(meta.exp||'—')+'；'+(meta.sign==='negative'?'正在处理负数绝对值':'正在处理非负数')+'。每轮从 0 到 9 收集数位桶。';
+  content='<div class="struct-label">DIGIT BUCKETS / 个位 · 十位 · 百位</div>'
+  +'<div class="struct-row">'+chip('位权 '+(meta.exp??'—'))+chip(meta.sign==='negative'?'负数绝对值':'非负数')+chip(meta.phase==='collect'?'收集阶段':'分桶阶段')+'</div>'
+  +'<div class="bucket-list radix-buckets">'+buckets.map((b,i)=>'<div class="bucket-item'+(i===meta.activeBucket?' bucket-selected':'')+'"><span class="bucket-number">'+i+'</span><div class="bucket-values">'+(b.length?b.map(v=>'<span>'+htmlEscape(meta.sign==='negative'?-v:v)+'</span>').join(''):'<span>·</span>')+'</div></div>').join('')+'</div>';
+  caption='0–9 号桶按当前位权稳定接收元素，之后依序收集。'+(meta.phase==='collect'?'现在按桶顺序写回主数组。':meta.activeValue!==undefined?'当前元素：'+meta.activeValue:'');
  }else if(algorithm==='bucket'){
-  const buckets=meta.buckets||[],total=buckets.length;
-  content='<div class="struct-label">RANGE BUCKETS / 数值区间分桶</div><div class="bucket-list">'
-   +buckets.map((b,i)=>'<div class="bucket-item"><span class="bucket-number">桶 '+(i+1)+'</span><div class="bucket-values">'+(b.length?b.map(v=>'<span>'+htmlEscape(v)+'</span>').join(''):'<span>·</span>')+'</div></div>').join('')+'</div>';
-  if(!total)content+='<p class="filler">等待完成初始化分桶。</p>';
-  caption='元素按区间划入桶，再分别执行桶内排序和拼接。';
- }else{
-  const title=algorithm==='bubble'?'ADJACENT PAIR / 相邻比较':algorithm==='selection'?'MINIMUM SEARCH / 寻找最小值':algorithm==='insertion'?'ORDERED PREFIX / 插入排序': 'GAP INSERTION / 分组插入';
-  content='<div class="struct-label">'+title+'</div>';
-  if(active.length)content+=row(active.map(i=>i+': '+values[i]));
-  else content+='<p class="filler">按下「单步」开始，观察当前比较或写入的元素。</p>';
-  content+='<div class="struct-spacer struct-label">当前轮次 '+f.pass+' · 已确认归位 '+f.sorted.length+' 个元素</div>';
-  caption='当前焦点和排序状态会随着时间轴同步变化。';
+  const b=meta.buckets||[],total=b.length,min=meta.min??0,max=meta.max??0;
+  content='<div class="struct-label">RANGE BUCKETS / 按数值区间分配</div>'
+  +'<div class="struct-row">'+chip('当前桶 '+(meta.selected===undefined?'—':meta.selected+1))+chip('阶段 '+(meta.phase||'准备'))+'</div>'
+  +'<div class="bucket-list range-buckets">'+b.map((bucket,i)=>{const lo=min+(max-min)*i/total,hi=i===total-1?max:min+(max-min)*(i+1)/total;return '<div class="bucket-item'+(i===meta.selected?' bucket-selected':'')+'"><span class="bucket-number">'+(i+1)+'<small>'+Math.round(lo)+'–'+Math.round(hi)+'</small></span><div class="bucket-values">'+(bucket.length?bucket.map((v,j)=>'<span class="'+(i===meta.selected&&j===meta.focus?'bucket-focused':'')+'">'+htmlEscape(v)+'</span>').join(''):'<span>·</span>')+'</div></div>'}).join('')+'</div>';
+  if(!total)content+='<p class="filler">等待初始化数值区间桶。</p>';
+  caption='先分配，再在每个桶内部执行插入排序：比较、右移和插入都有真实事件帧；最后顺序写回。';
  }
  ui.inspector.innerHTML=content;
  ui.inspectorCaption.textContent=caption;
 }
 function renderCode(f){
- const targets={bubble:{compare:3,swap:4},selection:{compare:3,swap:5},insertion:{compare:3,write:4},shell:{compare:4,write:5},merge:{compare:4,write:5},quick:{compare:4,swap:5},heap:{compare:4,swap:5},counting:{count:1,write:4},radix:{bucket:2,write:3,pass:2},bucket:{bucket:2,compare:4,write:5}};
+ const targets={bubble:{compare:3,swap:4},selection:{compare:3,swap:5},insertion:{compare:3,write:4},shell:{compare:4,write:5},merge:{compare:4,write:5},quick:{compare:4,swap:5},heap:{compare:4,swap:5},counting:{count:1,write:4},radix:{bucket:2,write:3,pass:2},bucket:{bucket:2,compare:4,'bucket-write':4,write:5}};
  const index=targets[algorithm]?.[f.kind];
  [...ui.code.children].forEach((line,i)=>line.classList.toggle('active',i===index));
 }
 function render(previous){
  const f=frames[cursor];if(!f)return;const n=f.values.length;
- renderBars(f,previous);renderInspector(f);renderCode(f);
+ renderBars(f,previous);renderInspector(f,previous);renderCode(f);
  ui.compStat.textContent=f.comparisons;ui.swapStat.textContent=f.swaps;
  ui.writeStat.textContent=f.writes;ui.passStat.textContent=f.pass;
  ui.stepStat.textContent=cursor+'/'+(frames.length-1);ui.timeline.value=String(cursor);
@@ -180,7 +256,7 @@ function render(previous){
  ui.status.className='status'+(done?' complete':running?' playing':cursor?' paused':'');
  ui.play.textContent=done?'↻ 再播放':'▶ '+(cursor?'继续播放':'开始排序');
  ui.pause.disabled=!running;ui.step.disabled=done;ui.back.disabled=cursor===0;
- const types={compare:'正在比较',swap:'交换元素',write:'写入元素',pass:'轮次完成',count:'累计频次',bucket:'元素分桶',complete:'排序完成',init:'准备就绪'};
+ const types={compare:'正在比较',swap:'交换元素',write:'写入元素',pass:'轮次完成',count:'累计频次',bucket:'元素分桶','bucket-write':'桶内写入',complete:'排序完成',init:'准备就绪'};
  const chapter=types[f.kind]||'处理中';
  ui.hint.textContent='共 '+(frames.length-1)+' 帧 · '+chapter;
  ui.chapter.textContent='当前阶段：'+chapter;
