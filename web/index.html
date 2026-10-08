@@ -1,128 +1,22 @@
 <!doctype html>
-<html lang="zh-CN">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0b121d">
-  <meta name="description" content="可交互的冒泡排序算法实验室：单步演示、速度控制、自定义数组和算法分析。">
-  <title>Sorting Lab — 让排序看得见</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script defer src="./app.bundle.js"></script>
-</head>
-<body>
-  <div class="ambient ambient-left" aria-hidden="true"></div>
-  <div class="ambient ambient-right" aria-hidden="true"></div>
-  <div class="page-wrap">
-    <header class="site-header">
-      <a href="./index.html" class="brand" aria-label="Sorting Lab 首页">
-        <span class="brand-mark"><span class="mark-bars"><i></i><i></i><i></i></span></span>
-        <span class="brand-text">SORTING<span>LAB</span><small>ALGORITHM PLAYGROUND</small></span>
-      </a>
-      <span class="nav-pill"><span class="online-indicator"></span> INTERACTIVE LEARNING STUDIO</span>
-      <a href="../src/sorts.js" class="header-link">10 CLASSIC ALGORITHMS <span aria-hidden="true">↗</span></a>
-    </header>
-
-    <main>
-      <div class="eyebrow"><span class="eyebrow-line"></span> EXPERIMENT 01 <span class="eyebrow-divider">/</span> 10</div>
-      <div class="hero-row">
-        <div>
-          <h1>让每一次<span>排序</span><br>都清晰可见<span class="hero-dot">.</span></h1>
-          <p class="lead">不只是理解算法，更要<span>看见</span>算法。逐帧观察数据比较、位置交换与有序序列的形成。</p>
-        </div>
-        <div class="hero-index" aria-hidden="true"><span>01</span><small>BUBBLE SORT</small></div>
-      </div>
-
-      <section class="workspace" aria-label="冒泡排序可视化实验室">
-        <div class="visual-panel">
-          <div class="panel-header">
-            <div class="panel-heading">
-              <span class="square-icon">▥</span>
-              <div><div class="section-kicker">LIVE VISUALIZATION</div><h2>冒泡排序 <span>BUBBLE SORT</span></h2></div>
-            </div>
-            <span class="status-badge" id="statusBadge"><span></span><span id="statusText" aria-live="polite">准备就绪</span></span>
-          </div>
-
-          <div class="plot">
-            <div class="plot-header"><span><span class="tiny-square"></span> ARRAY VISUALIZER</span><span id="arraySummary">22 ELEMENTS</span></div>
-            <div class="plot-area">
-              <div class="plot-lines" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-              <div id="bars" class="bars" role="img" aria-label="待排序数组的柱状图"></div>
-              <div class="axis-bottom" aria-hidden="true"></div>
-            </div>
-            <div class="legend"><span><i class="legend-block default"></i> 未排序</span><span><i class="legend-block active"></i> 正在比较</span><span><i class="legend-block sorted"></i> 已排序</span></div>
-          </div>
-
-          <div class="progress-area">
-            <div class="progress-caption"><span>SORTING PROGRESS</span><strong id="progressText">0%</strong></div>
-            <div class="progress-track" role="progressbar" aria-label="排序进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressBar"><div id="progressFill"></div></div>
-          </div>
-
-          <div class="transport">
-            <button class="control primary" id="playBtn"><span class="play-icon">▶</span> <span id="playText">开始排序</span></button>
-            <button class="control" id="pauseBtn" disabled><span class="pause-icon">Ⅱ</span> 暂停</button>
-            <button class="control" id="stepBtn"><span class="forward-icon">↦</span> 单步执行</button>
-            <button class="control muted" id="resetBtn"><span class="reset-icon">↺</span> 重置</button>
-            <div class="keyboard-tip">SPACE <span>播放 / 暂停</span></div>
-          </div>
-
-          <div class="activity-box"><span class="activity-icon">↳</span><div><span class="activity-label">CURRENT OPERATION</span><p id="activity" aria-live="polite">等待开始 — 点击“开始排序”，看看数字如何找到自己的位置。</p></div></div>
-        </div>
-
-        <aside class="side-panel">
-          <section class="metrics-panel">
-            <div class="side-heading"><span>01</span> 实时统计 <small>LIVE STATS</small></div>
-            <div class="metrics-grid">
-              <div class="metric"><span>比较次数 <small>COMPARISONS</small></span><strong id="compStat">0</strong></div>
-              <div class="metric"><span>交换次数 <small>SWAPS</small></span><strong id="swapStat">0</strong></div>
-              <div class="metric"><span>完成轮次 <small>PASSES</small></span><strong id="passStat">0</strong></div>
-              <div class="metric"><span>数组长度 <small>ITEMS</small></span><strong id="sizeStat">22</strong></div>
-            </div>
-          </section>
-
-          <section class="settings-panel">
-            <div class="side-heading"><span>02</span> 实验参数 <small>CONTROLS</small></div>
-            <div class="field-head"><label for="sizeRange">数组长度</label><output id="sizeOutput" for="sizeRange">22</output></div>
-            <input type="range" id="sizeRange" min="2" max="48" value="22" step="1" aria-label="数组长度">
-            <div class="range-ends"><span>2 ELEMENTS</span><span>48 ELEMENTS</span></div>
-            <div class="field-head speed-head"><label for="speedRange">动画速度</label><output id="speedOutput" for="speedRange">3×</output></div>
-            <input type="range" id="speedRange" min="1" max="5" value="3" step="1" aria-label="动画速度">
-            <div class="range-ends"><span>SLOW</span><span>FAST</span></div>
-            <div class="field-head distribution-head"><label for="preset">数据分布</label></div>
-            <div class="select-wrap"><select id="preset" aria-label="数据分布"><option value="random">随机乱序</option><option value="reverse">完全逆序</option><option value="nearly">近乎有序</option><option value="sorted">完全有序（观察提前退出）</option></select></div>
-            <button class="shuffle-btn" id="shuffleBtn">⤨ &nbsp; 按当前设置重新生成 <span>↗</span></button>
-            <div class="custom-data">
-              <label for="customInput">或输入自定义整数数组</label>
-              <div class="custom-row"><input id="customInput" type="text" placeholder="例如 8, 3, 5, 1, 7" spellcheck="false" autocomplete="off"><button id="applyBtn" type="button">应用自定义数组</button></div>
-              <p class="input-message" id="inputMessage" role="status">填入数字后点击「应用自定义数组」，支持负数和重复值（2–48 项）。</p>
-            </div>
-          </section>
-        </aside>
-      </section>
-
-      <section class="knowledge-grid" aria-label="算法知识">
-        <div class="knowledge-card code-card">
-          <div class="card-top"><div><div class="section-kicker">UNDER THE HOOD</div><h2>算法伪代码</h2></div><span class="card-top-tag">PSEUDOCODE</span></div>
-          <div class="code-window" aria-label="冒泡排序伪代码">
-            <div class="code-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-            <div class="code-line" data-line="1"><span>01</span><code><b>for</b> pass = 0 to n - 2:</code></div>
-            <div class="code-line" data-line="2"><span>02</span><code>  swapped = <b>false</b></code></div>
-            <div class="code-line" data-line="3"><span>03</span><code>  <b>for</b> i = 0 to n - 2 - pass:</code></div>
-            <div class="code-line" data-line="4"><span>04</span><code>    <em>if</em> a[i] &gt; a[i + 1]:</code></div>
-            <div class="code-line" data-line="5"><span>05</span><code>      swap(a[i], a[i + 1])</code></div>
-            <div class="code-line" data-line="6"><span>06</span><code>      swapped = <b>true</b></code></div>
-            <div class="code-line" data-line="7"><span>07</span><code>  <em>if</em> !swapped: <b>break</b></code></div>
-          </div>
-          <p class="code-note">每轮相邻元素两两比较，较大的元素逐渐“冒泡”至数组末端。如果一轮没有交换，数组就已经有序。</p>
-        </div>
-        <div class="knowledge-card complexity-card">
-          <div class="card-top"><div><div class="section-kicker">ALGORITHM PROFILE</div><h2>算法特性</h2></div><span class="card-top-tag">ANALYSIS</span></div>
-          <div class="complexity-list"><div><span>最佳时间复杂度</span><strong class="good">O(n)</strong></div><div><span>平均时间复杂度</span><strong>O(n²)</strong></div><div><span>最坏时间复杂度</span><strong>O(n²)</strong></div><div><span>额外空间复杂度</span><strong>O(1)</strong></div><div><span>排序稳定性</span><strong class="good">稳定 STABLE</strong></div></div>
-          <div class="tip"><span>✦</span><p>由于采用了“无交换则提前结束”的优化，已经有序的数组只需 <strong>n − 1 次比较</strong>。</p></div>
-        </div>
-      </section>
-      <section class="catalogue"><div><div class="section-kicker">THE COMPLETE COLLECTION</div><h2>不止冒泡：10 大经典排序算法</h2><p>源码中还包含另外 9 种实现，全部提供 JavaScript API 与自动化测试。</p></div><div class="chips"><span>冒泡</span><span>选择</span><span>插入</span><span>希尔</span><span>归并</span><span>快速</span><span>堆</span><span>计数</span><span>基数</span><span>桶</span></div></section>
-    </main>
-    <footer><span>SORTING LAB / EXPERIMENT 01</span><span>BUILT FOR CURIOUS MINDS <b>✦</b> 2026</span></footer>
-  </div>
-</body>
-</html>
+<html lang="zh-CN" data-theme="light"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="10 大经典排序算法交互可视化实验室"><title>Sorting Lab · 十大排序算法实验室</title><link rel="stylesheet" href="./styles.css"><script defer src="./app.bundle.js"></script></head>
+<body><div class="site">
+<header class="header"><a class="logo" href="./index.html"><span class="logo-icon">▥</span><span>SORTING <b>LAB</b><small>ALGORITHM PLAYGROUND / VOL. 02</small></span></a><div class="header-right"><span class="tag">◉ 10 ALGORITHMS · INTERACTIVE</span><button class="theme-btn" id="themeBtn">☾ 深色模式</button></div></header>
+<section class="hero"><div class="eyebrow">EXPLORE / COMPARE / UNDERSTAND <span>✳</span></div><h1>让每一种<span>排序</span>，<br>都清晰可见<span class="dot">.</span></h1><p>10 种经典算法 × 独立事件追踪。观察每一次比较、交换、写入和轮次变化；用同一组数据探索不同排序思路。</p><div class="hero-stats"><span>10 <small>ALGORITHMS</small></span><span>02 <small>VISUAL THEMES</small></span><span>100% <small>OFFLINE READY</small></span></div></section>
+<main><section class="algorithm-section"><div class="section-heading"><div><span class="kicker">01 / CHOOSE YOUR ALGORITHM</span><h2>选择一种排序算法</h2></div><p>切换算法时保留当前初始数组，方便横向比较。</p></div><div id="algorithmGrid" class="algorithm-grid"></div></section>
+<div class="layout">
+<section class="stage panel"><div class="stage-header"><div><span class="kicker">02 / LIVE VISUALIZATION</span><h2 id="algorithmTitle">冒泡排序 / Bubble Sort</h2><span id="algorithmCategory" class="type-chip">交换排序</span></div><span id="statusBadge" class="status">○ 准备就绪</span></div>
+<div class="chart"><div class="chart-top"><span>DATA ARRAY / VALUES</span><span id="sizeStat">22</span></div><div class="chart-area"><div class="grid-lines"><i></i><i></i><i></i><i></i><i></i></div><div id="bars" class="bars" role="img"></div><div class="axis"></div></div><div class="legend"><span><i class="default"></i>未排序</span><span><i class="comparing"></i>比较</span><span><i class="swapping"></i>交换</span><span><i class="writing"></i>写入/分桶</span><span><i class="sorted"></i>已排序</span></div></div>
+<div class="progress-caption"><b>SORTING PROGRESS</b><span id="progressText">0%</span></div><div class="progress-track"><div id="progressFill"></div></div>
+<div class="controls"><button id="playBtn" class="btn primary">▶ 开始排序</button><button id="pauseBtn" class="btn" disabled>Ⅱ 暂停</button><button id="backBtn" class="btn" disabled>← 上一步</button><button id="stepBtn" class="btn">下一步 →</button><button id="resetBtn" class="btn muted">↻ 重置</button></div>
+<div class="activity"><span class="activity-mark">↳</span><div><span class="kicker">CURRENT OPERATION <span id="stepHint"></span></span><p id="activity">等待开始</p></div></div>
+<div class="metrics"><div><small>比较 COMPARE</small><strong id="compStat">0</strong></div><div><small>交换 SWAP</small><strong id="swapStat">0</strong></div><div><small>写入 WRITE</small><strong id="writeStat">0</strong></div><div><small>轮次 PASS</small><strong id="passStat">0</strong></div></div><div class="step-counter">FRAME <span id="stepStat">0/0</span> · SPACE 播放/暂停 · ← / → 逐步操作</div></section>
+<aside class="right"><section class="panel settings"><div class="small-heading"><span>03 / PLAYGROUND SETTINGS</span><h3>实验参数</h3></div>
+<div class="fieldrow"><label for="sizeRange">数组长度</label><output id="sizeOutput">22</output></div><input id="sizeRange" type="range" min="2" max="48" value="22"><div class="limits"><span>2 ELEMENTS</span><span>48 ELEMENTS</span></div>
+<div class="fieldrow"><label for="speedRange">动画速度</label><output id="speedOutput">3×</output></div><input id="speedRange" type="range" min="1" max="5" value="3"><div class="limits"><span>SLOW</span><span>FAST</span></div>
+<div class="fieldrow"><label for="preset">数据分布</label></div><select id="preset"><option value="random">随机乱序</option><option value="reverse">完全逆序</option><option value="nearly">近乎有序</option><option value="sorted">完全有序</option></select>
+<button id="shuffleBtn" class="regenerate">⤨ 按当前设置重新生成 ↗</button>
+<div class="custom-input"><label for="customInput">自定义整数数组</label><input id="customInput" placeholder="8, -3, 5, 1, 7" autocomplete="off" spellcheck="false"><button id="applyBtn" class="btn primary">✓ 应用自定义数组</button><p id="inputMessage">支持 2–48 个整数、负数及重复值（-999～999）。</p></div></section>
+<section class="panel profile"><div class="small-heading"><span>04 / ALGORITHM PROFILE</span><h3>复杂度与特性</h3></div><div class="property"><span>最佳</span><strong id="bestComplexity"></strong></div><div class="property"><span>平均</span><strong id="averageComplexity"></strong></div><div class="property"><span>最坏</span><strong id="worstComplexity"></strong></div><div class="property"><span>额外空间*</span><strong id="spaceComplexity"></strong></div><div class="property"><span>稳定性*</span><strong id="stability"></strong></div><p class="fineprint">* 复杂度按经典算法计算，不包含动画帧记录开销；非比较排序的稳定性按经典实现语义描述。</p></section></aside></div>
+<section class="learn-grid"><section class="panel explain"><span class="kicker">05 / HOW IT WORKS</span><h2>算法原理</h2><p id="algorithmDesc"></p><div class="learning-tip">✦ 每个算法有独立的事件轨迹，并非共用冒泡排序动画。</div></section><section class="panel explain"><span class="kicker">06 / PSEUDOCODE</span><h2>算法伪代码</h2><div id="pseudocode" class="pseudocode"></div></section></section>
+</main><footer><span>SORTING LAB / TEN SORTING ALGORITHMS</span><span>原生 JavaScript · 离线运行 · 零外部依赖</span></footer></div></body></html>

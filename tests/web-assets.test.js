@@ -1,37 +1,5 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
-import { resolve } from 'node:path';
-const root = resolve(import.meta.dirname, '..');
-
-test('all referenced UI IDs exist in the HTML', async () => {
-  const html = await readFile(resolve(root, 'web/index.html'), 'utf8');
-  const js = await readFile(resolve(root, 'web/app.js'), 'utf8');
-  const ids = [...js.matchAll(/\$\('([^']+)'\)/g)].map(match => match[1]);
-  assert.ok(ids.length >= 20);
-  for (const id of ids) {
-    assert.match(html, new RegExp(`\\bid="${id}"`), `missing DOM element: ${id}`);
-  }
-});
-
-test('web entrypoint loads a classic offline-compatible bundle and ships CSS', async () => {
-  const html = await readFile(resolve(root, 'web/index.html'), 'utf8');
-  const js = await readFile(resolve(root, 'web/app.js'), 'utf8');
-  const css = await readFile(resolve(root, 'web/styles.css'), 'utf8');
-  const machine = await readFile(resolve(root, 'src/bubble-machine.js'), 'utf8');
-  assert.match(html, /<script defer src="\.\/app\.bundle\.js"><\/script>/);
-  assert.match(js, /import \{ BubbleMachine \} from '\.\.\/src\/bubble-machine\.js'/);
-  assert.match(machine, /export class BubbleMachine/);
-  assert.match(js, /import \{ BubbleMachine \} from/);
-  assert.match(css, /\.bar\.sorted/);
-});
-
-test('offline HTML contains embedded CSS and executable JS (not module imports)', async () => {
-  const file = await readFile(resolve(root, 'web/standalone.html'), 'utf8');
-  const bundle = await readFile(resolve(root, 'web/app.bundle.js'), 'utf8');
-  assert.match(file, /<style>[\s\S]*<\/style>/);
-  assert.match(file, /<script>[\s\S]*<\/script>/);
-  assert.doesNotMatch(file, /type="module"|src="\.\/app\.js"/);
-  assert.match(bundle, /class BubbleMachine/);
-  assert.match(bundle, /addEventListener\('click', applyCustom\)/);
-});
+import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {resolve} from 'node:path';
+const read=p=>readFile(resolve(import.meta.dirname,'..',p),'utf8');
+test('interface hooks exist in the HTML',async()=>{const html=await read('web/index.html'),app=await read('web/app.js');const ids=[...app.matchAll(/\$\('([^']+)'\)/g)].map(m=>m[1]);assert.ok(ids.length>35);for(const id of ids)assert.match(html,new RegExp('\\bid="'+id+'"'),'Missing element: '+id);});
+test('ten algorithm UI, theme toggle, and custom-array events are wired',async()=>{const html=await read('web/index.html'),app=await read('web/app.js');assert.match(html,/id="algorithmGrid"/);assert.match(html,/id="themeBtn"/);assert.match(app,/addEventListener\('click',applyCustom\)/);assert.match(app,/selectAlgorithm/);assert.match(app,/generateTrace\(initial,algorithm\)/);assert.match(app,/applyTheme/);});
+test('generated standalone embeds styling and app logic',async()=>{const html=await read('web/standalone.html'),bundle=await read('web/app.bundle.js');assert.match(html,/<style>[\s\S]*<\/style>/);assert.match(html,/<script>[\s\S]*<\/script>/);assert.doesNotMatch(html,/src="\.\/app\.bundle\.js"|href="\.\/styles\.css"/);assert.match(bundle,/function generateTrace\(/);assert.match(bundle,/addEventListener\('click',applyCustom\)/);assert.match(html,/data-theme="light"/);});
